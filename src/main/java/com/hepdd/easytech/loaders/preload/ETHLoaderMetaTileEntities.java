@@ -11,7 +11,7 @@ public class ETHLoaderMetaTileEntities implements Runnable {
     }
 
     private static void registerMultiblockControllers() {
-        ETHItemList.Machine_Super_Bricked_BlastFurnace
+        ETHItemList.Machine_Big_Bricked_BlastFurnace
             .set(new ETHBrickedBlastFurnace(2800, "multimachine.superbrickedblastfurnace", "大型砖高炉").getStackForm(1L));
     }
 }

@@ -294,7 +294,7 @@ public abstract class ETHPrimitiveBlastFurnace extends MetaTileEntity
             if (this.mMaxProgresstime > 0 && (aTimer % 20L == 0L)) {
                 Pollution.addPollution(
                     this.getBaseMetaTileEntity(),
-                    GTMod.gregtechproxy.mPollutionPrimitveBlastFurnacePerSecond);
+                    GTMod.gregtechproxy.mPollutionPrimitveBlastFurnacePerSecond * (this.mLevel + 4));
             }
 
             aBaseMetaTileEntity.setActive((this.mMaxProgresstime > 0) && (this.mMachine));

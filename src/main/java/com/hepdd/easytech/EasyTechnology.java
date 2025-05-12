@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
+import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -37,6 +38,7 @@ public class EasyTechnology {
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
         new ETHLoaderMetaTileEntities().run();
+        new ETHLoaderRecipe().run();
     }
 
     @Mod.EventHandler

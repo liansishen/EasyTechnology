@@ -50,10 +50,10 @@ public class ETHBrickedBlastFurnace extends ETHPrimitiveBlastFurnace implements 
         return getCurrentDescription();
     }
 
-    @Override
-    public boolean isDisplaySecondaryDescription() {
-        return false;
-    }
+    // @Override
+    // public boolean isDisplaySecondaryDescription() {
+    // return ISecondaryDescribable.super.isDisplaySecondaryDescription();
+    // }
 
     public String[] getPrimaryDescription() {
         return getTooltip().getInformation();
@@ -70,12 +70,8 @@ public class ETHBrickedBlastFurnace extends ETHPrimitiveBlastFurnace implements 
                 .addInfo("Usable for Steel and general Pyrometallurgy")
                 .addInfo("Has a useful interface, unlike other gregtech multis")
                 .addPollutionAmount(GTMod.gregtechproxy.mPollutionPrimitveBlastFurnacePerSecond)
-                .beginStructureBlock(3, 4, 3, true)
+                .beginStructureBlock(7, 6, 7, false)
                 .addController("Front center")
-                .addOtherStructurePart("Firebricks", "Everything except the controller")
-                .addStructureInfo("The top block is also empty")
-                .addStructureInfo("You can share the walls of GT multis, so")
-                .addStructureInfo("each additional one costs less, up to 4")
                 .toolTipFinisher();
         }
         return tooltipBuilder;

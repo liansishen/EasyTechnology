@@ -10,7 +10,7 @@ import gregtech.api.util.GTUtility;
 
 public enum ETHItemList {
 
-    Machine_Super_Bricked_BlastFurnace;
+    Machine_Big_Bricked_BlastFurnace;
 
     private boolean mHasNotBeenSet;
     private boolean mDeprecated;
