@@ -13,7 +13,7 @@ public class CommonProxy {
         Config.synchronizeConfiguration(event.getSuggestedConfigurationFile());
 
         EasyTechnology.LOG.info(Config.greeting);
-        EasyTechnology.LOG.info("I am MyMod at version " + Tags.VERSION);
+        EasyTechnology.LOG.info("I am EasyTechnology at version " + Tags.VERSION);
     }
 
     // load "Do your mod setup. Build whatever data structures you care about. Register recipes." (Remove if not needed)

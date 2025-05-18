@@ -1,6 +1,7 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
 import static gregtech.api.util.GTWaila.getMachineProgressString;
+import static mods.railcraft.common.blocks.machine.alpha.EnumMachineAlpha.COKE_OVEN;
 
 import java.util.List;
 
@@ -13,7 +14,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import gregtech.GTMod;
-import gregtech.api.GregTechAPI;
 import gregtech.api.enums.SteamVariant;
 import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ISecondaryDescribable;
@@ -25,23 +25,21 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
-public class ETHBrickedBlastFurnace extends ETHPrimitiveBlastFurnace implements ISecondaryDescribable {
+public class ETHBigCokeOven extends ETHCokeOven implements ISecondaryDescribable {
 
-    private static final ITexture[] FACING_SIDE = { TextureFactory.of(Textures.BlockIcons.MACHINE_CASING_DENSEBRICKS) };
+    private static final ITexture[] FACING_SIDE = {
+        TextureFactory.of(new Textures.BlockIcons.CustomIcon("iconsets/MACHINE_CASING_COKEOVEN")) };
     private static final ITexture[] FACING_FRONT = {
-        TextureFactory.of(Textures.BlockIcons.MACHINE_CASING_BRICKEDBLASTFURNACE_INACTIVE) };
+        TextureFactory.of(new Textures.BlockIcons.CustomIcon("iconsets/MACHINE_CASING_COKEOVEN_INACTIVE")) };
     private static final ITexture[] FACING_ACTIVE = {
-        TextureFactory.of(Textures.BlockIcons.MACHINE_CASING_BRICKEDBLASTFURNACE_ACTIVE), TextureFactory.builder()
-            .addIcon(Textures.BlockIcons.MACHINE_CASING_BRICKEDBLASTFURNACE_ACTIVE_GLOW)
-            .glow()
-            .build() };
+        TextureFactory.of(new Textures.BlockIcons.CustomIcon("iconsets/MACHINE_CASING_COKEOVEN_ACTIVE")) };
     private MultiblockTooltipBuilder tooltipBuilder;
 
-    public ETHBrickedBlastFurnace(int aID, String aName, String aNameRegional) {
+    public ETHBigCokeOven(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
 
-    public ETHBrickedBlastFurnace(String aName) {
+    public ETHBigCokeOven(String aName) {
         super(aName);
     }
 
@@ -88,22 +86,22 @@ public class ETHBrickedBlastFurnace extends ETHPrimitiveBlastFurnace implements 
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new ETHBrickedBlastFurnace(this.mName);
+        return new ETHBigCokeOven(this.mName);
     }
 
     @Override
     protected Block getCasingBlock() {
-        return GregTechAPI.sBlockCasings4;
+        return COKE_OVEN.getBlock();
     }
 
     @Override
     protected int getCasingMetaID() {
-        return 15;
+        return 7;
     }
 
     @Override
     public String getName() {
-        return "大型砖高炉";
+        return "大型焦炉";
     }
 
     @Override
