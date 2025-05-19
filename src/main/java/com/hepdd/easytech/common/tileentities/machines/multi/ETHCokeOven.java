@@ -63,8 +63,7 @@ public abstract class ETHCokeOven extends MetaTileEntity
     private static final String STRUCTURE_PIECE_BOTTOM = "bottom";
     private static final int MAX_LEVEL = 12;
     private FluidTankLong tank;
-    public IFluidTanksHandler fluidTankHandler;
-    private IFluidHandler fluidHandler;
+    private IFluidTanksHandler fluidTankHandler;
 
     private static final ClassValue<IStructureDefinition<ETHCokeOven>> STRUCTURE_DEFINITION = new ClassValue<>() {
 
@@ -114,6 +113,7 @@ public abstract class ETHCokeOven extends MetaTileEntity
 
     public ETHCokeOven(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional, INPUT_SLOTS + OUTPUT_SLOTS);
+
         tank = new FluidTankLong(64 * 1000);
         fluidTankHandler = new FluidTanksHandler(tank);
     }
