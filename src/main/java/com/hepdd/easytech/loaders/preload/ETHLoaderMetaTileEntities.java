@@ -24,17 +24,17 @@ public class ETHLoaderMetaTileEntities implements Runnable {
             .set(new ETHBigCokeOven(2801, "multimachine.bigcokeoven", "大型焦炉").getStackForm(1L));
     }
 
-    private static void registerHatch(){
+    private static void registerHatch() {
         ETHItemList.Hatch_Input_Primitive
-            .set(new ETHHatchInput(4000,1,"hatch.input.tier.primitive","Primitive Input Hatch",0).getStackForm(1L));
+            .set(new ETHHatchInput(4000, 1, "hatch.input.tier.primitive", "Primitive Input Hatch", 0).getStackForm(1L));
 
         ETHItemList.Hatch_Output_Primitive
-                .set(new ETHHatchOutput(4001, "hatch.output.tier.primitive","Primitive Output Hatch",0).getStackForm(1L));
+            .set(new ETHHatchOutput(4001, "hatch.output.tier.primitive", "Primitive Output Hatch", 0).getStackForm(1L));
 
-        ETHItemList.Hatch_Input_Bus_Primitive
-            .set(new ETHHatchInputBus(4002,"hatch.inputbus.tier.primitive","Primitive Input Bus",0).getStackForm(1L));
+        ETHItemList.Hatch_Input_Bus_Primitive.set(
+            new ETHHatchInputBus(4002, "hatch.inputbus.tier.primitive", "Primitive Input Bus", 0).getStackForm(1L));
 
-        ETHItemList.Hatch_Output_Bus_Primitive
-            .set(new ETHHatchOutputBus(4003,"hatch.outputbus.tier.primitive","Primitive Output Bus",0).getStackForm(1L));
+        ETHItemList.Hatch_Output_Bus_Primitive.set(
+            new ETHHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "Primitive Output Bus", 0).getStackForm(1L));
     }
 }

@@ -18,7 +18,6 @@ public enum ETHItemList {
     Hatch_Input_Bus_Primitive,
     Hatch_Output_Bus_Primitive,
 
-
     ;
 
     private boolean mHasNotBeenSet;

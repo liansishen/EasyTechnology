@@ -1,18 +1,17 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.util.ForgeDirection;
+
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import gregtech.api.enums.Textures;
-import gregtech.api.gui.modularui.GTUIInfos;
+
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchInput;
 import gregtech.api.render.TextureFactory;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
 
 public class ETHHatchInput extends MTEHatchInput {
 
@@ -30,7 +29,8 @@ public class ETHHatchInput extends MTEHatchInput {
     }
 
     @Override
-    public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing, int colorIndex, boolean aActive, boolean redstoneLevel) {
+    public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing,
+        int colorIndex, boolean aActive, boolean redstoneLevel) {
         ITexture background;
 
         background = TextureFactory.of(Blocks.stonebrick);
@@ -48,13 +48,13 @@ public class ETHHatchInput extends MTEHatchInput {
 
     @Override
     public boolean allowPullStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
-                                  ItemStack aStack) {
+        ItemStack aStack) {
         return aIndex == 1;
     }
 
     @Override
     public boolean allowPutStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
-                                 ItemStack aStack) {
+        ItemStack aStack) {
         return aIndex == 0;
     }
 
@@ -64,5 +64,5 @@ public class ETHHatchInput extends MTEHatchInput {
     }
 
     @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) { }
+    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {}
 }

@@ -33,7 +33,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
-import gregtech.api.enums.Materials;
 import gregtech.api.enums.ParticleFX;
 import gregtech.api.enums.SteamVariant;
 import gregtech.api.gui.modularui.GTUIInfos;
@@ -50,7 +49,6 @@ import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.WorldSpawnedEventBuilder;
 import gregtech.common.pollution.Pollution;
-import net.minecraftforge.fluids.IFluidHandler;
 
 public abstract class ETHCokeOven extends MetaTileEntity
     implements IAlignment, ISurvivalConstructable, RecipeMapWorkable, IAddUIWidgets, IGetTitleColor {
@@ -124,7 +122,6 @@ public abstract class ETHCokeOven extends MetaTileEntity
         fluidTankHandler = new FluidTanksHandler(tank);
     }
 
-
     @Override
     public boolean isTeleporterCompatible() {
         return false;
@@ -185,7 +182,7 @@ public abstract class ETHCokeOven extends MetaTileEntity
         if (this.mOutputFluid != null) {
             NBTTagCompound tNBT = new NBTTagCompound();
             this.mOutputFluid.writeToNBT(tNBT);
-            aNBT.setTag("mOutputFluid",tNBT);
+            aNBT.setTag("mOutputFluid", tNBT);
         }
         aNBT.setInteger("mLevel", this.mLevel);
     }
@@ -199,7 +196,7 @@ public abstract class ETHCokeOven extends MetaTileEntity
         for (int i = 0; i < OUTPUT_SLOTS; i++) {
             this.mOutputItems[i] = GTUtility.loadItem(aNBT, "mOutputItem" + i);
         }
-        this.mOutputFluid = GTUtility.loadFluid(aNBT,"mOutputFluid");
+        this.mOutputFluid = GTUtility.loadFluid(aNBT, "mOutputFluid");
         this.mLevel = aNBT.getInteger("mLevel");
     }
 
