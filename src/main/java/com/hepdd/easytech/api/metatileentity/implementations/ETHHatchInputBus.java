@@ -1,5 +1,6 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -7,6 +8,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 
+import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
@@ -31,9 +33,16 @@ public class ETHHatchInputBus extends MTEHatchInputBus {
     @Override
     public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing,
         int colorIndex, boolean aActive, boolean redstoneLevel) {
-        ITexture background;
+        int texturePointer = getUpdateData(); // just to be sure, from my testing the 8th bit cannot be
+        // set clientside
+        int textureIndex = texturePointer | (getmTexturePage() << 7); // Shift seven since one page is 128 textures!
 
-        background = TextureFactory.of(Blocks.stonebrick);
+        ITexture background;
+        if (textureIndex > 0) {
+            background = Textures.BlockIcons.casingTexturePages[getmTexturePage()][texturePointer];
+        } else {
+            background = TextureFactory.of(Blocks.stonebrick);
+        }
 
         if (side != aFacing) {
             return new ITexture[] { background };
@@ -58,6 +67,9 @@ public class ETHHatchInputBus extends MTEHatchInputBus {
         return aIndex != getCircuitSlot() && (mRecipeMap == null || disableFilter || mRecipeMap.containsInput(aStack))
             && (disableLimited || limitedAllowPutStack(aIndex, aStack));
     }
+
+    @Override
+    public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ) {}
 
     @Override
     public boolean allowSelectCircuit() {
