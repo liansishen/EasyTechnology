@@ -81,16 +81,17 @@ public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase<ETHLargeBlastFur
                     STRUCTURE_PIECE_MAIN,
                     transpose(
                         new String[][] {
-                            { "    c~c    ", "   scccs   ", "  sc   cs  ", " sc     cs ", "cc       cc", "cc       cc",
-                                "cc       cc", " sc     cs ", "  sc   cs  ", "   scccs   ", "    ccc    ", } }))
+                            { "    a~a    ", "   scccs   ", "  sc   cs  ", " sc     cs ", "ac       ca", "ac       ca",
+                                "ac       ca", " sc     cs ", "  sc   cs  ", "   scccs   ", "    aaa    ", } }))
                 .addShape(
                     STRUCTURE_PIECE_BOTTOM,
                     transpose(
                         new String[][] {
-                            { "   scccs   ", " sssssssss ", " sssssssss ", "sssssssssss", "csssssssssc", "csssssssssc",
-                                "csssssssssc", "sssssssssss", " sssssssss ", " sssssssss ", "   scccs   ", } }))
+                            { "   saaas   ", " sssssssss ", " sssssssss ", "sssssssssss", "asssssssssa", "asssssssssa",
+                                "asssssssssa", "sssssssssss", " sssssssss ", " sssssssss ", "   saaas   ", } }))
+                .addElement('c', ofBlock(GregTechAPI.sBlockCasings4, 15))
                 .addElement(
-                    'c',
+                    'a',
                     buildHatchAdder(ETHLargeBlastFurnace.class).atLeast(InputBus, OutputBus)
                         .casingIndex(MACHINE_CASING_PRIMITIVE_BLASE_FURNACE.ID)
                         .dot(1)

@@ -70,15 +70,16 @@ public class ETHLargeCokeOven extends ETHNonConsumMultiBase<ETHLargeCokeOven> im
                 .addShape(
                     STRUCTURE_PIECE_MAIN,
                     transpose(
-                        new String[][] { { "  sc~cs  ", " scccccs ", "scc c ccs", "c   c  cc", "ccccccccc", "cc  c  cc",
-                            "scc c ccs", " scccccs ", "  scccs  ", } }))
+                        new String[][] { { "  sa~as  ", " scccccs ", "scc c ccs", "ac  c  ca", "accccccca", "ac  c  ca",
+                            "scc c ccs", " scccccs ", "  saaas  ", } }))
                 .addShape(
                     STRUCTURE_PIECE_BOTTOM,
                     transpose(
-                        new String[][] { { "  scccs  ", " sssssss ", "sssssssss", "csssssssc", "csssssssc", "csssssssc",
-                            "sssssssss", " sssssss ", "  scccs  ", } }))
+                        new String[][] { { "  saaas  ", " sssssss ", "sssssssss", "asssssssa", "asssssssa", "asssssssa",
+                            "sssssssss", " sssssss ", "  saaas  ", } }))
+                .addElement('c', ofBlock(COKE_OVEN.getBlock(), 7))
                 .addElement(
-                    'c',
+                    'a',
                     buildHatchAdder(ETHLargeCokeOven.class).atLeast(OutputHatch, InputBus, OutputBus)
                         .casingIndex(MACHINE_CASING_COKEOVEN_INACTIVE.ID)
                         .dot(1)
