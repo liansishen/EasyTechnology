@@ -8,6 +8,7 @@ import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchOu
 import com.hepdd.easytech.common.tileentities.machines.multi.ETHLargeBlastFurnace;
 import com.hepdd.easytech.common.tileentities.machines.multi.ETHLargeCokeOven;
 
+import com.hepdd.easytech.common.tileentities.machines.multi.ETHPrimitiveVoidMiner;
 import gregtech.api.enums.Textures;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTUtility;
@@ -54,6 +55,9 @@ public class ETHLoaderMetaTileEntities implements Runnable {
 
         ETHItemList.Machine_Large_Coke_Oven
             .set(new ETHLargeCokeOven(2801, "multimachine.largecokeoven", "大型焦炉").getStackForm(1L));
+
+        ETHItemList.Machine_Void_Miner
+            .set(new ETHPrimitiveVoidMiner(2802,"multimachine.primitivevoidminer","虚空矿机").getStackForm(1L));
     }
 
     private static void registerHatch() {

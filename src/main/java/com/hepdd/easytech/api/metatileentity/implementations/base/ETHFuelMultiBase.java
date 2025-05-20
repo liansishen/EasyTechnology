@@ -28,6 +28,10 @@ public abstract class ETHFuelMultiBase<T extends ETHFuelMultiBase<T>> extends GT
 
     private int intBurnTime = 0;
 
+    public ETHFuelMultiBase(String aName) {
+        super(aName);
+    }
+
     public ETHFuelMultiBase(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
@@ -84,7 +88,7 @@ public abstract class ETHFuelMultiBase<T extends ETHFuelMultiBase<T>> extends GT
 
     @Override
     public boolean onRunningTick(ItemStack aStack) {
-        if (lEUt < 0) {
+        if (mEUt < 0) {
             if (!tryConsumeFuel(1)) {
                 stopMachine(ShutDownReasonRegistry.POWER_LOSS);
                 return false;
