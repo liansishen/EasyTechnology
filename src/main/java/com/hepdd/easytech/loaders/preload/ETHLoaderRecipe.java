@@ -1,8 +1,9 @@
 package com.hepdd.easytech.loaders.preload;
 
-import static com.hepdd.easytech.api.enums.ETHRecipeMaps.bigCokeOvenRecipe;
+import static com.hepdd.easytech.api.enums.ETHRecipeMaps.largeCokeOvenRecipe;
 import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.util.GTRecipeConstants.ADDITIVE_AMOUNT;
+import static mods.railcraft.common.blocks.machine.alpha.EnumMachineAlpha.COKE_OVEN;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -22,9 +23,19 @@ public class ETHLoaderRecipe implements Runnable {
     @Override
     public void run() {
         registerCokeOvenRecipes();
+        registerCraftRecipe();
+    }
+
+    public void registerCraftRecipe() {
+
         GTModHandler.addCraftingRecipe(
             ETHItemList.Machine_Large_Bricked_BlastFurnace.get(1),
             new Object[] { "AA ", "AA ", "   ", 'A', ItemList.Machine_Bricked_BlastFurnace.get(1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Machine_Large_Coke_Oven.get(1),
+            new Object[] { "AA ", "AA ", "   ", 'A', COKE_OVEN.getItem() });
+
     }
 
     public void registerCokeOvenRecipes() {
@@ -35,7 +46,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(500))
             .duration(COKE_COOK_TIME)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -44,7 +55,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(4500))
             .duration(9 * COKE_COOK_TIME)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -53,7 +64,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(250))
             .duration(COKE_COOK_TIME)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -62,7 +73,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(30))
             .duration(COKE_COOK_TIME / 3)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -71,7 +82,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(30))
             .duration(COKE_COOK_TIME / 3)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -80,7 +91,7 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(30))
             .duration(COKE_COOK_TIME / 3)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
 
         GTValues.RA.stdBuilder()
             .eut(0)
@@ -89,6 +100,6 @@ public class ETHLoaderRecipe implements Runnable {
             .fluidOutputs(Fluids.CREOSOTE.get(30))
             .duration(COKE_COOK_TIME / 3)
             .metadata(ADDITIVE_AMOUNT, 4)
-            .addTo(bigCokeOvenRecipe);
+            .addTo(largeCokeOvenRecipe);
     }
 }

@@ -18,7 +18,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 import com.gtnewhorizon.structurelib.alignment.IAlignmentLimits;
+import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchInputBus;
 import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchOutputBus;
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHNonConsumMultiBase;
@@ -30,9 +32,12 @@ import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
+import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.util.MultiblockTooltipBuilder;
 
-public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase {
+public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase<ETHLargeBlastFurnace>
+    implements ISurvivalConstructable {
 
     private static final String STRUCTURE_PIECE_TOP = "top";
     private static final String STRUCTURE_PIECE_TOP_LAYER = "topLayer";
@@ -109,6 +114,11 @@ public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase {
     }
 
     @Override
+    public RecipeMap<?> getRecipeMap() {
+        return RecipeMaps.primitiveBlastRecipes;
+    }
+
+    @Override
     protected int getCasingTextureIndex() {
         return MACHINE_CASING_PRIMITIVE_BLASE_FURNACE.ID;
     }
@@ -142,18 +152,44 @@ public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase {
             buildPiece(STRUCTURE_PIECE_BOTTOM_LAYER, stackSize, hintsOnly, 5, mHeight++, 0);
         }
         int intLevel = 0;
-        NBTTagCompound tag = stackSize.getTagCompound();
-        if (tag != null) {
-            intLevel = tag.getCompoundTag("channels")
-                .getInteger("stack_size");
-        }
-        intLevel = Math.min(intLevel, MAX_LEVEL);
+        intLevel = Math.min(stackSize.stackSize, MAX_LEVEL);
         this.mLevel = intLevel;
         for (int i = 0; i < intLevel; i++) {
             buildPiece(STRUCTURE_PIECE_LAYER, stackSize, hintsOnly, 5, mHeight++, 0);
         }
         buildPiece(STRUCTURE_PIECE_TOP_LAYER, stackSize, hintsOnly, 5, mHeight++, 0);
         buildPiece(STRUCTURE_PIECE_TOP, stackSize, hintsOnly, 5, mHeight, 0);
+    }
+
+    @Override
+    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
+        if (mMachine) return -1;
+        int mHeight = -1;
+        int build = survivialBuildPiece(STRUCTURE_PIECE_BOTTOM, stackSize, 5, mHeight++, 0, elementBudget, env, false);
+        if (build >= 0) return build;
+        build = survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 5, mHeight++, 0, elementBudget, env, false);
+        if (build >= 0) return build;
+        for (int i = 0; i < 2; i++) {
+            build = survivialBuildPiece(
+                STRUCTURE_PIECE_BOTTOM_LAYER,
+                stackSize,
+                5,
+                mHeight++,
+                0,
+                elementBudget,
+                env,
+                false);
+            if (build >= 0) return build;
+        }
+        int intLevel = 0;
+        intLevel = Math.min(stackSize.stackSize, MAX_LEVEL);
+        for (int i = 0; i < intLevel; i++) {
+            build = survivialBuildPiece(STRUCTURE_PIECE_LAYER, stackSize, 5, mHeight++, 0, elementBudget, env, false);
+            if (build >= 0) return build;
+        }
+        build = survivialBuildPiece(STRUCTURE_PIECE_TOP_LAYER, stackSize, 5, mHeight++, 0, elementBudget, env, false);
+        if (build >= 0) return build;
+        return survivialBuildPiece(STRUCTURE_PIECE_TOP, stackSize, 5, mHeight, 0, elementBudget, env, false);
     }
 
     @Override

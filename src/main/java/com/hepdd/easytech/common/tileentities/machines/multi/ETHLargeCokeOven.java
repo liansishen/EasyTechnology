@@ -103,7 +103,7 @@ public class ETHLargeCokeOven extends ETHNonConsumMultiBase<ETHLargeCokeOven> im
 
     @Override
     public RecipeMap<?> getRecipeMap() {
-        return ETHRecipeMaps.bigCokeOvenRecipe;
+        return ETHRecipeMaps.largeCokeOvenRecipe;
     }
 
     @Override

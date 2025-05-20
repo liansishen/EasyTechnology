@@ -50,27 +50,23 @@ public class ETHLoaderMetaTileEntities implements Runnable {
 
     private static void registerMultiblockControllers() {
         ETHItemList.Machine_Large_Bricked_BlastFurnace
-            .set(new ETHLargeBlastFurnace(2800, "multimachine.bigbrickedblastfurnace", "大型砖高炉").getStackForm(1L));
+            .set(new ETHLargeBlastFurnace(2800, "multimachine.largebrickedblastfurnace", "大型砖高炉").getStackForm(1L));
 
         ETHItemList.Machine_Large_Coke_Oven
-            .set(new ETHLargeCokeOven(2801, "multimachine.bigcokeoven", "大型焦炉").getStackForm(1L));
+            .set(new ETHLargeCokeOven(2801, "multimachine.largecokeoven", "大型焦炉").getStackForm(1L));
     }
 
     private static void registerHatch() {
-        ETHItemList.Hatch_Input_Primitive.set(
-            new ETHPrimitiveHatchInput(4000, 1, "hatch.input.tier.primitive", "Primitive Input Hatch", 0)
-                .getStackForm(1L));
+        ETHItemList.Hatch_Input_Primitive
+            .set(new ETHPrimitiveHatchInput(4000, 1, "hatch.input.tier.primitive", "原始输入仓", 0).getStackForm(1L));
 
-        ETHItemList.Hatch_Output_Primitive.set(
-            new ETHPrimitiveHatchOutput(4001, "hatch.output.tier.primitive", "Primitive Output Hatch", 0)
-                .getStackForm(1L));
+        ETHItemList.Hatch_Output_Primitive
+            .set(new ETHPrimitiveHatchOutput(4001, "hatch.output.tier.primitive", "原始输出仓", 0).getStackForm(1L));
 
-        ETHItemList.Hatch_Input_Bus_Primitive.set(
-            new ETHPrimitiveHatchInputBus(4002, "hatch.inputbus.tier.primitive", "Primitive Input Bus", 0)
-                .getStackForm(1L));
+        ETHItemList.Hatch_Input_Bus_Primitive
+            .set(new ETHPrimitiveHatchInputBus(4002, "hatch.inputbus.tier.primitive", "原始输入总线", 0).getStackForm(1L));
 
-        ETHItemList.Hatch_Output_Bus_Primitive.set(
-            new ETHPrimitiveHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "Primitive Output Bus", 0)
-                .getStackForm(1L));
+        ETHItemList.Hatch_Output_Bus_Primitive
+            .set(new ETHPrimitiveHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "原始输出总线", 0).getStackForm(1L));
     }
 }

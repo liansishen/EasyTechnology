@@ -21,11 +21,13 @@ public abstract class ETHNonConsumMultiBase<T extends ETHNonConsumMultiBase<T>> 
     public ETHNonConsumMultiBase(String aName) {
         super(aName);
         MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     public ETHNonConsumMultiBase(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
         MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     @Override

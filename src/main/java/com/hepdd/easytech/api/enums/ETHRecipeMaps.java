@@ -6,7 +6,7 @@ import gregtech.api.recipe.RecipeMapBuilder;
 
 public final class ETHRecipeMaps {
 
-    public static final RecipeMap<RecipeMapBackend> bigCokeOvenRecipe = RecipeMapBuilder.of("gt.recipe.bigcokeOven")
+    public static final RecipeMap<RecipeMapBackend> largeCokeOvenRecipe = RecipeMapBuilder.of("gt.recipe.bigcokeOven")
         .maxIO(1, 1, 0, 1)
         .minInputs(1, 0)
         .build();
