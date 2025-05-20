@@ -23,7 +23,7 @@ public class ETHLoaderRecipe implements Runnable {
     public void run() {
         registerCokeOvenRecipes();
         GTModHandler.addCraftingRecipe(
-            ETHItemList.Machine_Big_Bricked_BlastFurnace.get(1),
+            ETHItemList.Machine_Large_Bricked_BlastFurnace.get(1),
             new Object[] { "AA ", "AA ", "   ", 'A', ItemList.Machine_Bricked_BlastFurnace.get(1) });
     }
 

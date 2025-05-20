@@ -15,19 +15,19 @@ import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchOutput;
 import gregtech.api.render.TextureFactory;
 
-public class ETHHatchOutput extends MTEHatchOutput {
+public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
 
-    public ETHHatchOutput(int aID, String aName, String aNameRegional, int aTier) {
+    public ETHPrimitiveHatchOutput(int aID, String aName, String aNameRegional, int aTier) {
         super(aID, aName, aNameRegional, aTier);
     }
 
-    public ETHHatchOutput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
+    public ETHPrimitiveHatchOutput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
         super(aName, aTier, aDescription, aTextures);
     }
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new ETHHatchOutput(mName, mTier, mDescriptionArray, mTextures);
+        return new ETHPrimitiveHatchOutput(mName, mTier, mDescriptionArray, mTextures);
     }
 
     @Override
@@ -79,5 +79,7 @@ public class ETHHatchOutput extends MTEHatchOutput {
     }
 
     @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {}
+    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        super.addUIWidgets(builder, buildContext);
+    }
 }

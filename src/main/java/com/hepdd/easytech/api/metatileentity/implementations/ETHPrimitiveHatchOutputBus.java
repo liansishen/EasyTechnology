@@ -8,26 +8,25 @@ import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 
 import gregtech.api.enums.Textures;
-import gregtech.api.gui.widgets.PhantomItemButton;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchOutputBus;
 import gregtech.api.render.TextureFactory;
 
-public class ETHHatchOutputBus extends MTEHatchOutputBus {
+public class ETHPrimitiveHatchOutputBus extends MTEHatchOutputBus {
 
-    public ETHHatchOutputBus(int aID, String aName, String aNameRegional, int aTier) {
+    public ETHPrimitiveHatchOutputBus(int aID, String aName, String aNameRegional, int aTier) {
         super(aID, aName, aNameRegional, aTier);
     }
 
-    public ETHHatchOutputBus(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
+    public ETHPrimitiveHatchOutputBus(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
         super(aName, aTier, aDescription, aTextures);
     }
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new ETHHatchOutputBus(mName, mTier, mDescriptionArray, mTextures);
+        return new ETHPrimitiveHatchOutputBus(mName, mTier, mDescriptionArray, mTextures);
     }
 
     @Override
@@ -66,8 +65,9 @@ public class ETHHatchOutputBus extends MTEHatchOutputBus {
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        builder.widget(
-            new PhantomItemButton(this).setPos(getGUIWidth() - 25, 40)
-                .setBackground(PhantomItemButton.FILTER_BACKGROUND));
+        // builder.widget(
+        // new PhantomItemButton(this).setPos(getGUIWidth() - 25, 40)
+        // .setBackground(PhantomItemButton.FILTER_BACKGROUND));
+        super.addUIWidgets(builder, buildContext);
     }
 }

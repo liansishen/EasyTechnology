@@ -10,8 +10,8 @@ import gregtech.api.util.GTUtility;
 
 public enum ETHItemList {
 
-    Machine_Big_Bricked_BlastFurnace,
-    Machine_Big_Coke_Oven,
+    Machine_Large_Bricked_BlastFurnace,
+    Machine_Large_Coke_Oven,
 
     Hatch_Input_Primitive,
     Hatch_Output_Primitive,

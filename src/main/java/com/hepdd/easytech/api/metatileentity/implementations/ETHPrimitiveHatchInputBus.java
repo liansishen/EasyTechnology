@@ -1,5 +1,6 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -11,22 +12,22 @@ import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.implementations.MTEHatchInput;
+import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
 import gregtech.api.render.TextureFactory;
 
-public class ETHHatchInput extends MTEHatchInput {
+public class ETHPrimitiveHatchInputBus extends MTEHatchInputBus {
 
-    public ETHHatchInput(int aID, int aSlot, String aName, String aNameRegional, int aTier) {
-        super(aID, aSlot, aName, aNameRegional, aTier);
+    public ETHPrimitiveHatchInputBus(int id, String name, String nameRegional, int tier) {
+        super(id, name, nameRegional, tier);
     }
 
-    public ETHHatchInput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
+    public ETHPrimitiveHatchInputBus(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
         super(aName, aTier, aDescription, aTextures);
     }
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new ETHHatchInput(mName, mTier, mDescriptionArray, mTextures);
+        return new ETHPrimitiveHatchInputBus(mName, mTier, mDescriptionArray, mTextures);
     }
 
     @Override
@@ -57,20 +58,26 @@ public class ETHHatchInput extends MTEHatchInput {
     @Override
     public boolean allowPullStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
         ItemStack aStack) {
-        return aIndex == 1;
+        return aIndex != getCircuitSlot();
     }
 
     @Override
     public boolean allowPutStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
         ItemStack aStack) {
-        return aIndex == 0;
+        return aIndex != getCircuitSlot() && (mRecipeMap == null || disableFilter || mRecipeMap.containsInput(aStack))
+            && (disableLimited || limitedAllowPutStack(aIndex, aStack));
     }
 
     @Override
-    public int getCapacity() {
-        return 64 * 1000;
+    public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ) {}
+
+    @Override
+    public boolean allowSelectCircuit() {
+        return false;
     }
 
     @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {}
+    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        getBaseMetaTileEntity().add1by1Slot(builder);
+    }
 }
