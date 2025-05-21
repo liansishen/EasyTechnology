@@ -65,9 +65,6 @@ public class ETHPrimitiveHatchOutputBus extends MTEHatchOutputBus {
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        // builder.widget(
-        // new PhantomItemButton(this).setPos(getGUIWidth() - 25, 40)
-        // .setBackground(PhantomItemButton.FILTER_BACKGROUND));
-        super.addUIWidgets(builder, buildContext);
+        getBaseMetaTileEntity().add1by1Slot(builder);
     }
 }

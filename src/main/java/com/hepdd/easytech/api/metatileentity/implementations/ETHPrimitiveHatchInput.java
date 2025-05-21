@@ -68,7 +68,7 @@ public class ETHPrimitiveHatchInput extends MTEHatchInput {
 
     @Override
     public int getCapacity() {
-        return 64 * 1000;
+        return 8 * 1000;
     }
 
     @Override

@@ -18,6 +18,7 @@ import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
+import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
@@ -30,10 +31,14 @@ public abstract class ETHFuelMultiBase<T extends ETHFuelMultiBase<T>> extends GT
 
     public ETHFuelMultiBase(String aName) {
         super(aName);
+        MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     public ETHFuelMultiBase(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
+        MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     @Override

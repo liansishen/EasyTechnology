@@ -1,5 +1,9 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import com.gtnewhorizons.modularui.common.widget.DrawableWidget;
+import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+import com.gtnewhorizons.modularui.common.widget.TextWidget;
+import gregtech.api.gui.modularui.GTUITextures;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -80,6 +84,31 @@ public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        super.addUIWidgets(builder, buildContext);
+        builder.widget(
+                new DrawableWidget().setDrawable(GTUITextures.PICTURE_SCREEN_BLACK)
+                    .setPos(7, 16)
+                    .setSize(71, 45))
+            .widget(
+                new DrawableWidget().setDrawable(GTUITextures.PICTURE_GAUGE)
+                    .setPos(79, 34)
+                    .setSize(18, 18))
+            .widget(
+                new SlotWidget(inventoryHandler, getInputSlot())
+                    .setBackground(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_IN)
+                    .setPos(79, 16))
+            .widget(
+                new SlotWidget(inventoryHandler, getOutputSlot()).setAccess(true, false)
+                    .setBackground(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_OUT)
+                    .setPos(79, 52))
+            .widget(
+                createFluidSlot().setBackground(GTUITextures.TRANSPARENT)
+                    .setPos(58, 41))
+            .widget(
+                new TextWidget("Liquid Amount").setDefaultColor(COLOR_TEXT_WHITE.get())
+                    .setPos(10, 20))
+            .widget(
+                new TextWidget().setStringSupplier(() -> numberFormat.format(mFluid != null ? mFluid.amount : 0))
+                    .setDefaultColor(COLOR_TEXT_WHITE.get())
+                    .setPos(10, 30));
     }
 }

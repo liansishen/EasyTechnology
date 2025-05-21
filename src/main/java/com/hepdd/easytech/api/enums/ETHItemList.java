@@ -12,7 +12,11 @@ public enum ETHItemList {
 
     Machine_Large_Bricked_BlastFurnace,
     Machine_Large_Coke_Oven,
-    Machine_Void_Miner,
+    Machine_Primitive_Void_Miner,
+    Machine_Steam_Void_Miner,
+    Machine_LV_Void_Miner,
+    Machine_HV_Void_Miner,
+    Machine_IV_Void_Miner,
 
     Hatch_Input_Primitive,
     Hatch_Output_Primitive,
