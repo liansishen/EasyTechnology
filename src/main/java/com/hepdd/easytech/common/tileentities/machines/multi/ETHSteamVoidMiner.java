@@ -1,23 +1,29 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBase;
 
-import gregtech.api.enums.ItemList;
+import gregtech.api.GregTechAPI;
 import gregtech.api.enums.Materials;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.GTUtility;
 
 public class ETHSteamVoidMiner extends ETHVoidMinerBase {
 
     public ETHSteamVoidMiner(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
+        MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     public ETHSteamVoidMiner(String aName) {
         super(aName);
+        MTEMultiBlockBase.disableMaintenance = true;
+        if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     @Override
@@ -26,8 +32,13 @@ public class ETHSteamVoidMiner extends ETHVoidMinerBase {
     }
 
     @Override
-    public ItemList getCasingBlockItem() {
-        return ItemList.Hull_Bronze;
+    public Block getBlock() {
+        return GregTechAPI.sBlockCasings1;
+    }
+
+    @Override
+    public int getMeta() {
+        return 10;
     }
 
     @Override
@@ -41,7 +52,7 @@ public class ETHSteamVoidMiner extends ETHVoidMinerBase {
 
     @Override
     public int getCasingTextureIndex() {
-        return GTUtility.getCasingTextureIndex(ItemList.Hull_Bronze.getBlock(), 0);
+        return GTUtility.getCasingTextureIndex(getBlock(), getMeta());
     }
 
     @Override

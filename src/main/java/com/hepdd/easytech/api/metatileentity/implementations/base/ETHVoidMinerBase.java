@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -49,7 +50,6 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import bwcrossmod.galacticgreg.VoidMinerUtility;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
-import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.gui.modularui.GTUITextures;
@@ -96,15 +96,7 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
                             { " f ", "fcf", " f " }, { " f ", "fcf", " f " }, { " f ", "fcf", " f " },
                             { "b~b", "bbb", "bbb" }, }))
                 .addElement('f', lazy(t -> ofFrame(t.getFrameMaterial())))
-                .addElement(
-                    'c',
-                    lazy(
-                        t -> ofBlock(
-                            t.getCasingBlockItem()
-                                .getBlock(),
-                            t.getCasingBlockItem()
-                                .get(0)
-                                .getItemDamage())))
+                .addElement('c', lazy(t -> ofBlock(t.getBlock(), t.getMeta())))
                 .addElement(
                     'b',
                     lazy(
@@ -112,12 +104,7 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
                             .adder(ETHVoidMinerBase::addToMachineList)
                             .casingIndex(t.casingTextureIndex)
                             .dot(1)
-                            .buildAndChain(
-                                t.getCasingBlockItem()
-                                    .getBlock(),
-                                t.getCasingBlockItem()
-                                    .get(0)
-                                    .getItemDamage())))
+                            .buildAndChain(t.getBlock(), t.getMeta())))
                 .build();
         }
     };
@@ -161,9 +148,13 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
         this.oreType = type;
     }
 
+    public abstract Block getBlock();
+
+    public abstract int getMeta();
+
     public abstract Materials getFrameMaterial();
 
-    public abstract ItemList getCasingBlockItem();
+    // public abstract ItemList getCasingBlockItem();
 
     public abstract void setElectricityStats();
 
@@ -352,7 +343,7 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
     }
 
     @Override
-    protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
+    public void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
         screenElements.widget(
             TextWidget.dynamicString(() -> shutdownReason)
@@ -608,9 +599,6 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        String casings = this.getCasingBlockItem()
-            .get(0)
-            .getDisplayName();
 
         final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
         tt.addMachineType("Miner")
@@ -626,8 +614,8 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
                     + ".")
             .beginStructureBlock(3, 7, 3, false)
             .addController("Front bottom")
-            .addOtherStructurePart(casings, "form the 3x1x3 Base")
-            .addOtherStructurePart(casings, "1x3x1 pillar above the center of the base (2 minimum total)")
+            // .addOtherStructurePart(casings, "form the 3x1x3 Base")
+            // .addOtherStructurePart(casings, "1x3x1 pillar above the center of the base (2 minimum total)")
             .addOtherStructurePart(
                 this.getFrameMaterial().mName + " Frame Boxes",
                 "Each pillar's side and 1x3x1 on top")

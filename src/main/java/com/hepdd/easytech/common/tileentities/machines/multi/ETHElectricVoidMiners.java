@@ -1,5 +1,6 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBase;
@@ -28,9 +29,19 @@ public class ETHElectricVoidMiners {
             return Materials.Steel;
         }
 
-        @Override
         public ItemList getCasingBlockItem() {
             return ItemList.Casing_SolidSteel;
+        }
+
+        @Override
+        public Block getBlock() {
+            return getCasingBlockItem().getBlock();
+        }
+
+        @Override
+        public int getMeta() {
+            return getCasingBlockItem().get(0)
+                .getItemDamage();
         }
 
         @Override
@@ -70,8 +81,13 @@ public class ETHElectricVoidMiners {
         }
 
         @Override
-        public ItemList getCasingBlockItem() {
-            return ItemList.Casing_CleanStainlessSteel;
+        public Block getBlock() {
+            return GregTechAPI.sBlockCasings4;
+        }
+
+        @Override
+        public int getMeta() {
+            return 1;
         }
 
         @Override
@@ -86,7 +102,7 @@ public class ETHElectricVoidMiners {
 
         @Override
         public int getCasingTextureIndex() {
-            return GTUtility.getCasingTextureIndex(GregTechAPI.sBlockCasings4, 1);
+            return GTUtility.getCasingTextureIndex(getBlock(), getMeta());
         }
 
         @Override
@@ -111,8 +127,13 @@ public class ETHElectricVoidMiners {
         }
 
         @Override
-        public ItemList getCasingBlockItem() {
-            return ItemList.Casing_RobustTungstenSteel;
+        public Block getBlock() {
+            return GregTechAPI.sBlockCasings4;
+        }
+
+        @Override
+        public int getMeta() {
+            return 0;
         }
 
         @Override
@@ -127,7 +148,7 @@ public class ETHElectricVoidMiners {
 
         @Override
         public int getCasingTextureIndex() {
-            return GTUtility.getCasingTextureIndex(GregTechAPI.sBlockCasings4, 0);
+            return GTUtility.getCasingTextureIndex(getBlock(), getMeta());
         }
 
         @Override

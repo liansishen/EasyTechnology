@@ -1,22 +1,23 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
-import static com.hepdd.easytech.api.enums.ETHTextures.MACHINE_CASING_VOID_MINER_WOOD;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 
+import com.gtnewhorizons.modularui.api.math.Alignment;
+import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
+import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBase;
 
-import gregtech.api.enums.ItemList;
+import gregtech.api.GregTechAPI;
 import gregtech.api.enums.Materials;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 
 public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
@@ -36,8 +37,13 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     }
 
     @Override
-    public ItemList getCasingBlockItem() {
-        return ItemList.Casing_Reinforced_Wood;
+    public Block getBlock() {
+        return GregTechAPI.sBlockCasings9;
+    }
+
+    @Override
+    public int getMeta() {
+        return 2;
     }
 
     @Override
@@ -47,14 +53,14 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
 
     @Override
     public int getCasingTextureIndex() {
-        return MACHINE_CASING_VOID_MINER_WOOD.ID;
+        return GTUtility.getCasingTextureIndex(getBlock(), getMeta());
     }
 
     @Override
     public void setElectricityStats() {
         this.mOutputItems = new ItemStack[0];
         this.mProgresstime = 0;
-        this.mMaxProgresstime = 80; // 4s
+        this.mMaxProgresstime = 40; // 2s
         this.mEUt = -1;
         setMultiplier(4);
     }
@@ -65,13 +71,18 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     }
 
     @Override
-    public String[] getInfoData() {
-        List<String> mInfo = new ArrayList<>(
-            Arrays.stream(super.getInfoData())
-                .collect(Collectors.toList()));
-        mInfo.add("Burn time left:" + this.intBurnTime);
-
-        return mInfo.toArray(new String[0]);
+    public void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
+        super.drawTexts(screenElements, inventorySlot);
+        screenElements.widget(
+            TextWidget.dynamicString(() -> "Burn time left: " + this.intBurnTime / 20 + " s")
+                .setSynced(true)
+                .setTextAlignment(Alignment.CenterLeft)
+                .setDefaultColor(COLOR_TEXT_WHITE.get()))
+            .widget(
+                TextWidget.dynamicString(() -> getInfoData()[2])
+                    .setSynced(true)
+                    .setTextAlignment(Alignment.CenterLeft)
+                    .setDefaultColor(COLOR_TEXT_WHITE.get()));
     }
 
     @Override
