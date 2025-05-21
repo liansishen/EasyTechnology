@@ -2,7 +2,9 @@ package com.hepdd.easytech.common.tileentities.machines.multi;
 
 import static com.hepdd.easytech.api.enums.ETHTextures.MACHINE_CASING_VOID_MINER_WOOD;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import net.minecraft.item.ItemStack;

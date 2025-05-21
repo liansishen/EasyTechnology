@@ -9,7 +9,9 @@ import static gregtech.api.metatileentity.BaseTileEntity.TOOLTIP_DELAY;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.ofFrame;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,11 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.math.Pos2d;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.*;
+import com.gtnewhorizons.modularui.common.widget.ButtonWidget;
+import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
+import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
+import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import bwcrossmod.galacticgreg.VoidMinerUtility;
 import gregtech.api.GregTechAPI;
@@ -119,7 +125,7 @@ public abstract class ETHVoidMinerBase extends GTPPMultiBlockBase<ETHVoidMinerBa
     private VoidMinerUtility.DropMap extraDropMap = null;
     private float totalWeight;
     private int multiplier = 1;
-    private int oreType = 0;    // 0: rawOre 1: OreBlock
+    private int oreType = 0; // 0: rawOre 1: OreBlock
 
     private boolean mBlacklist = false;
 

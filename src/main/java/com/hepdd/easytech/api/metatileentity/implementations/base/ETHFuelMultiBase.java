@@ -80,7 +80,7 @@ public abstract class ETHFuelMultiBase<T extends ETHFuelMultiBase<T>> extends GT
     public abstract void construct(ItemStack stackSize, boolean hintsOnly);
 
     @Override
-    public abstract IStructureDefinition getStructureDefinition();
+    public abstract IStructureDefinition<T> getStructureDefinition();
 
     @Override
     protected abstract MultiblockTooltipBuilder createTooltip();

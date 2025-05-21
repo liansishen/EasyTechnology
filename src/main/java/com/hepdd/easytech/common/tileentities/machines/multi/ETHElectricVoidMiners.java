@@ -1,15 +1,15 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
+import net.minecraft.item.ItemStack;
+
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBase;
 
 import gregtech.api.GregTechAPI;
-import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.util.GTUtility;
-import net.minecraft.item.ItemStack;
 
 public class ETHElectricVoidMiners {
 
@@ -38,9 +38,9 @@ public class ETHElectricVoidMiners {
             this.mOutputItems = new ItemStack[0];
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
-            this.mEUt = -32;    //32eu/t
+            this.mEUt = -32; // 32eu/t
             setMultiplier(2);
-            setOreType(1);  // OreBlock
+            setOreType(1); // OreBlock
         }
 
         @Override
@@ -79,9 +79,9 @@ public class ETHElectricVoidMiners {
             this.mOutputItems = new ItemStack[0];
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
-            this.mEUt = -512;    // 512eu/t
+            this.mEUt = -512; // 512eu/t
             setMultiplier(4);
-            setOreType(1);  // OreBlock
+            setOreType(1); // OreBlock
         }
 
         @Override
@@ -120,9 +120,9 @@ public class ETHElectricVoidMiners {
             this.mOutputItems = new ItemStack[0];
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
-            this.mEUt = -8192;    // 8192eu/t
+            this.mEUt = -8192; // 8192eu/t
             setMultiplier(8);
-            setOreType(1);  // OreBlock
+            setOreType(1); // OreBlock
         }
 
         @Override
