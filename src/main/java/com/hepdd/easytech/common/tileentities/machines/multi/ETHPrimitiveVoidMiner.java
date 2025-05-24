@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 
 import com.gtnewhorizons.modularui.api.math.Alignment;
@@ -13,6 +14,7 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBase;
 
 import gregtech.api.GregTechAPI;
+import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -25,23 +27,26 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     private int intBurnTime;
 
     public ETHPrimitiveVoidMiner(String aName) {
-        super(aName);
+        super(aName, 0);
         MTEMultiBlockBase.disableMaintenance = true;
         if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     public ETHPrimitiveVoidMiner(int aID, String aName, String aNameRegional) {
-        super(aID, aName, aNameRegional);
+        super(aID, aName, aNameRegional, 0);
         MTEMultiBlockBase.disableMaintenance = true;
         if (!shouldCheckMaintenance()) fixAllIssues();
     }
 
     @Override
+    protected ItemList getCasingBlockItem() {
+        return ItemList.WoodenCasing;
+    }
+
     public Block getBlock() {
         return GregTechAPI.sBlockCasings9;
     }
 
-    @Override
     public int getMeta() {
         return 2;
     }
@@ -74,15 +79,11 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     public void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
         screenElements.widget(
-            TextWidget.dynamicString(() -> "Burn time left: " + this.intBurnTime / 20 + " s")
+            TextWidget.dynamicString(() -> "剩余燃烧时间: " + this.intBurnTime / 20 + " s")
                 .setSynced(true)
                 .setTextAlignment(Alignment.CenterLeft)
-                .setDefaultColor(COLOR_TEXT_WHITE.get()))
-            .widget(
-                TextWidget.dynamicString(() -> getInfoData()[2])
-                    .setSynced(true)
-                    .setTextAlignment(Alignment.CenterLeft)
-                    .setDefaultColor(COLOR_TEXT_WHITE.get()));
+                .setDefaultColor(COLOR_TEXT_WHITE.get())
+                .setEnabled(true));
     }
 
     @Override
@@ -121,5 +122,17 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
             }
         }
         return 0;
+    }
+
+    @Override
+    public void saveNBTData(NBTTagCompound aNBT) {
+        super.saveNBTData(aNBT);
+        aNBT.setInteger("mBurnTime", this.intBurnTime);
+    }
+
+    @Override
+    public void loadNBTData(NBTTagCompound aNBT) {
+        super.loadNBTData(aNBT);
+        this.intBurnTime = aNBT.getInteger("mBurnTime");
     }
 }

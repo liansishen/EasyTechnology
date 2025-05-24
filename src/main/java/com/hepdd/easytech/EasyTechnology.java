@@ -52,4 +52,5 @@ public class EasyTechnology {
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
     }
+
 }

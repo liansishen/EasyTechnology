@@ -5,6 +5,7 @@ import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.util.GTRecipeConstants.ADDITIVE_AMOUNT;
 import static mods.railcraft.common.blocks.machine.alpha.EnumMachineAlpha.COKE_OVEN;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
@@ -12,6 +13,8 @@ import com.hepdd.easytech.api.enums.ETHItemList;
 
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
+import gregtech.api.enums.Materials;
+import gregtech.api.enums.OrePrefixes;
 import gregtech.api.util.GTModHandler;
 import gregtech.api.util.GTOreDictUnificator;
 import mods.railcraft.common.fluids.Fluids;
@@ -35,6 +38,64 @@ public class ETHLoaderRecipe implements Runnable {
         GTModHandler.addCraftingRecipe(
             ETHItemList.Machine_Large_Coke_Oven.get(1),
             new Object[] { "AA ", "AA ", "   ", 'A', COKE_OVEN.getItem() });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Machine_Primitive_Void_Miner.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "AAA", "ABA", "CCC", 'A', OrePrefixes.frameGt.get(Materials.Wood), 'B',
+                OrePrefixes.gear.get(Materials.Wood), 'C', ItemList.WoodenCasing.get(1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Machine_Steam_Void_Miner.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "AAA", "ABA", "CCC", 'A', OrePrefixes.frameGt.get(Materials.Bronze), 'B',
+                OrePrefixes.gear.get(Materials.Bronze), 'C', ItemList.Casing_BronzePlatedBricks.get(1) });
+
+        GTModHandler.addShapelessCraftingRecipe(
+            ETHItemList.Machine_LV_Void_Miner.get(1),
+            new Object[] { ItemList.Machine_LV_Miner.get(1) });
+
+        GTModHandler.addShapelessCraftingRecipe(
+            ETHItemList.Machine_HV_Void_Miner.get(1),
+            new Object[] { ItemList.Machine_HV_Miner.get(1) });
+
+        GTModHandler.addShapelessCraftingRecipe(
+            ETHItemList.Machine_IV_Void_Miner.get(1),
+            new Object[] { ItemList.OreDrill1.get(1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Hatch_Input_Bus_Primitive.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "ABA", "CDC", "ABA", 'A', OrePrefixes.plank.get(Materials.Wood), 'B',
+                OrePrefixes.plate.get(Materials.Iron), 'C', OrePrefixes.plate.get(Materials.Tin), 'D',
+                new ItemStack(Blocks.chest, 1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Hatch_Output_Bus_Primitive.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "ACA", "BDB", "ACA", 'A', OrePrefixes.plank.get(Materials.Wood), 'B',
+                OrePrefixes.plate.get(Materials.Iron), 'C', OrePrefixes.plate.get(Materials.Tin), 'D',
+                new ItemStack(Blocks.chest, 1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Hatch_Input_Primitive.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "ABA", "CDC", "ABA", 'A', OrePrefixes.plank.get(Materials.Wood), 'B',
+                OrePrefixes.plate.get(Materials.Iron), 'C', OrePrefixes.plate.get(Materials.Tin), 'D',
+                new ItemStack(Blocks.glass, 1) });
+
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.Hatch_Output_Primitive.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "ACA", "BDB", "ACA", 'A', OrePrefixes.plank.get(Materials.Wood), 'B',
+                OrePrefixes.plate.get(Materials.Iron), 'C', OrePrefixes.plate.get(Materials.Tin), 'D',
+                new ItemStack(Blocks.glass, 1) });
 
     }
 
