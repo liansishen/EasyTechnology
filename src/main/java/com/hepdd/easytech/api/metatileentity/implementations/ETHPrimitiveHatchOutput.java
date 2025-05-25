@@ -1,5 +1,7 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import static com.hepdd.easytech.loaders.preload.ETHStatics.AuthorEasyTechForItem;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -22,7 +24,13 @@ import gregtech.api.render.TextureFactory;
 public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
 
     public ETHPrimitiveHatchOutput(int aID, String aName, String aNameRegional, int aTier) {
-        super(aID, aName, aNameRegional, aTier);
+        super(
+            aID,
+            aName,
+            aNameRegional,
+            aTier,
+            new String[] { "Fluid Output for Multiblocks", "Capacity: 64000L", AuthorEasyTechForItem },
+            1);
     }
 
     public ETHPrimitiveHatchOutput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {

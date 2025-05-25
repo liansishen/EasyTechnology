@@ -3,6 +3,7 @@ package com.hepdd.easytech.common.tileentities.machines.multi;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.*;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.hepdd.easytech.api.enums.ETHTextures.*;
+import static com.hepdd.easytech.loaders.preload.ETHStatics.AuthorEasyTech;
 import static gregtech.api.enums.HatchElement.*;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 
@@ -207,7 +208,7 @@ public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase<ETHLargeBlastFur
             .addPollutionAmount(GTMod.gregtechproxy.mPollutionPrimitveBlastFurnacePerSecond)
             .beginStructureBlock(7, 6, 7, false)
             .addController("Front center")
-            .toolTipFinisher();
+            .toolTipFinisher(AuthorEasyTech);
 
         return tooltipBuilder;
     }

@@ -1,12 +1,16 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
+import static gregtech.api.enums.HatchElement.*;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 
+import com.google.common.collect.ImmutableList;
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
@@ -16,11 +20,13 @@ import com.hepdd.easytech.api.metatileentity.implementations.base.ETHVoidMinerBa
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
+import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.shutdown.ShutDownReasonRegistry;
+import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 
 public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
 
@@ -134,5 +140,23 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     public void loadNBTData(NBTTagCompound aNBT) {
         super.loadNBTData(aNBT);
         this.intBurnTime = aNBT.getInteger("mBurnTime");
+    }
+
+    @Override
+    protected List<IHatchElement<? super MTEDrillerBase>> getAllowedHatches() {
+        return ImmutableList.of(InputBus, OutputBus);
+    }
+
+    @Override
+    public String[] getToolTips() {
+        String[] lines = new String[7];
+        lines[0] = "based on fuel's burn time"; // consume
+        lines[1] = "4 Raw Ores"; // output items
+        lines[2] = "2 Seconds"; // cost time
+        lines[3] = ""; // energy hatch
+        lines[4] = ""; // maintenance hatch
+        lines[5] = "Fuels or Ores, any base casing"; // input bus
+        lines[6] = ""; // input hatch
+        return lines;
     }
 }

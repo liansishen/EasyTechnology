@@ -1,5 +1,7 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import static com.hepdd.easytech.loaders.preload.ETHStatics.AuthorEasyTechForItem;
+
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -17,7 +19,14 @@ import gregtech.api.render.TextureFactory;
 public class ETHPrimitiveHatchInput extends MTEHatchInput {
 
     public ETHPrimitiveHatchInput(int aID, int aSlot, String aName, String aNameRegional, int aTier) {
-        super(aID, aSlot, aName, aNameRegional, aTier);
+        super(
+            aID,
+            aSlot,
+            aName,
+            aNameRegional,
+            aTier,
+            new String[] { "Fluid Input for Multiblocks", "Capacity: 8000L", "Can hold 1 types of fluid.",
+                AuthorEasyTechForItem });
     }
 
     public ETHPrimitiveHatchInput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {

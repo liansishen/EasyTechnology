@@ -1,7 +1,6 @@
 package com.hepdd.easytech.api.metatileentity.implementations.base;
 
-import static com.hepdd.easytech.loaders.preload.ETHStatics.DimMap;
-import static com.hepdd.easytech.loaders.preload.ETHStatics.getDimMap;
+import static com.hepdd.easytech.loaders.preload.ETHStatics.*;
 import static gregtech.api.enums.HatchElement.*;
 
 import java.util.HashMap;
@@ -16,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
@@ -42,6 +42,7 @@ import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
+import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.SimpleShutDownReason;
 import gregtech.common.WorldgenGTOreLayer;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
@@ -83,6 +84,8 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     public void setOreType(int type) {
         this.oreType = type;
     }
+
+    public abstract String[] getToolTips();
 
     protected boolean workingAtBottom() {
         // if the dropMap has never been initialised or if the dropMap is empty
@@ -311,7 +314,6 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
         super.addUIWidgets(builder, buildContext);
-
     }
 
     @Override
@@ -324,5 +326,42 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     public void loadNBTData(NBTTagCompound aNBT) {
         super.loadNBTData(aNBT);
         this.dimensionName = aNBT.getString("mDimension");
+    }
+
+    @Override
+    protected MultiblockTooltipBuilder createTooltip() {
+        String casings = this.getCasingBlockItem()
+            .get(0)
+            .getDisplayName();
+        String[] childToolTips = getToolTips();
+        final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
+        tt.addMachineType("Miner")
+            .addInfo("Consumes " + childToolTips[0])
+            .addInfo("Put the Ore into the input bus to set the Whitelist/Blacklist")
+            .addInfo(
+                "Will output " + childToolTips[1]
+                    + " every "
+                    + childToolTips[2]
+                    + " depending on the Dimension it is build in")
+            .addInfo("Use a screwdriver to toggle Whitelist/Blacklist")
+            .addInfo(
+                "Blacklist or non Whitelist Ore will be " + EnumChatFormatting.DARK_RED
+                    + "VOIDED"
+                    + EnumChatFormatting.RESET
+                    + ".")
+            .beginStructureBlock(3, 7, 3, false)
+            .addController("Front bottom")
+            .addOtherStructurePart(casings, "form the 3x1x3 Base")
+            .addOtherStructurePart(casings, "1x3x1 pillar above the center of the base (2 minimum total)")
+            .addOtherStructurePart(
+                this.getFrameMaterial().mName + " Frame Boxes",
+                "Each pillar's side and 1x3x1 on top");
+        if (!childToolTips[3].isEmpty()) tt.addEnergyHatch(childToolTips[3]);
+        if (!childToolTips[4].isEmpty()) tt.addMaintenanceHatch(childToolTips[4]);
+        if (!childToolTips[5].isEmpty()) tt.addInputBus(childToolTips[5]);
+        tt.addOutputBus("Any base casing");
+        if (!childToolTips[6].isEmpty()) tt.addInputHatch(childToolTips[6]);
+        tt.toolTipFinisher(AuthorEasyTech);
+        return tt;
     }
 }

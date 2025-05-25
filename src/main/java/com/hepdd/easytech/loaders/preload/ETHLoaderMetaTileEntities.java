@@ -97,11 +97,11 @@ public class ETHLoaderMetaTileEntities implements Runnable {
                 .getStackForm(1L));
 
         ETHItemList.Hatch_Input_Bus_Primitive.set(
-            new ETHPrimitiveHatchInputBus(4002, "hatch.inputbus.tier.primitive", "Primitive Input Bus", 0)
+            new ETHPrimitiveHatchInputBus(4002, "hatch.input_bus.tier.primitive", "Primitive Input Bus", 0)
                 .getStackForm(1L));
 
         ETHItemList.Hatch_Output_Bus_Primitive.set(
-            new ETHPrimitiveHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "Primitive Output Bus", 0)
+            new ETHPrimitiveHatchOutputBus(4003, "hatch.output_bus.tier.primitive", "Primitive Output Bus", 0)
                 .getStackForm(1L));
     }
 }

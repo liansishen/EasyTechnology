@@ -7,5 +7,5 @@ gt.blockmachines.multimachine.hvvoidminer.name=HV Void Miner
 gt.blockmachines.multimachine.ivvoidminer.name=IV Void Miner
 gt.blockmachines.hatch.input.tier.primitive.name=Primitive Input Hatch
 gt.blockmachines.hatch.output.tier.primitive.name=Primitive Output Hatch
-gt.blockmachines.hatch.inputbus.tier.primitive.name=Primitive Input Bus
-gt.blockmachines.hatch.outputbus.tier.primitive.name=Primitive Output Bus
+gt.blockmachines.hatch.input_bus.tier.primitive.name=Primitive Input Bus
+gt.blockmachines.hatch.output_bus.tier.primitive.name=Primitive Output Bus

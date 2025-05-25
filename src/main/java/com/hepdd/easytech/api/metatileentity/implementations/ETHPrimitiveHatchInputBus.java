@@ -1,5 +1,7 @@
 package com.hepdd.easytech.api.metatileentity.implementations;
 
+import static com.hepdd.easytech.loaders.preload.ETHStatics.AuthorEasyTechForItem;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -18,7 +20,13 @@ import gregtech.api.render.TextureFactory;
 public class ETHPrimitiveHatchInputBus extends MTEHatchInputBus {
 
     public ETHPrimitiveHatchInputBus(int id, String name, String nameRegional, int tier) {
-        super(id, name, nameRegional, tier);
+        super(
+            id,
+            name,
+            nameRegional,
+            tier,
+            1,
+            new String[] { "Item Input for Multiblocks", "Capacity: 1 stack", AuthorEasyTechForItem });
     }
 
     public ETHPrimitiveHatchInputBus(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {

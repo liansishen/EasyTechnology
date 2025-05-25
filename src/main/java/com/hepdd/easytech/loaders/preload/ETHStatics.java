@@ -5,6 +5,9 @@ import static galacticgreg.registry.GalacticGregRegistry.getModContainers;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
+
 import bartworks.common.configs.Configuration;
 import galacticgreg.api.ModContainer;
 import galacticgreg.api.ModDimensionDef;
@@ -12,6 +15,20 @@ import galacticgreg.api.ModDimensionDef;
 public class ETHStatics implements Runnable {
 
     public static Map<String, String> DimMap;
+    public static final String AuthorEasyTech = "Author: " + EnumChatFormatting.BLUE
+        + EnumChatFormatting.BOLD
+        + "Easy"
+        + EnumChatFormatting.AQUA
+        + EnumChatFormatting.BOLD
+        + "Technology";
+
+    public static final String AuthorEasyTechForItem = StatCollector.translateToLocal("GT5U.MBTT.Mod") + ":"
+        + EnumChatFormatting.BLUE
+        + EnumChatFormatting.BOLD
+        + "Easy"
+        + EnumChatFormatting.AQUA
+        + EnumChatFormatting.BOLD
+        + "Technology";
 
     @Override
     public void run() {

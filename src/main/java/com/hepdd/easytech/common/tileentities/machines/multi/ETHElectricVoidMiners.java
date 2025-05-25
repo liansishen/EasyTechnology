@@ -1,5 +1,7 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
+import static gregtech.api.enums.HatchElement.*;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 
@@ -75,6 +77,19 @@ public class ETHElectricVoidMiners {
             }
             return false;
         }
+
+        @Override
+        public String[] getToolTips() {
+            String[] lines = new String[7];
+            lines[0] = "32 EU/t"; // consume
+            lines[1] = "2 Ores"; // output items
+            lines[2] = "0.5 Second"; // cost time
+            lines[3] = "LV+, any base casing"; // energy hatch
+            lines[4] = "Any base casing"; // maintenance hatch
+            lines[5] = "Ores, optional, any base casing"; // input bus
+            lines[6] = ""; // input hatch
+            return lines;
+        }
     }
 
     public static class EVMHV extends ETHVoidMinerBase {
@@ -144,6 +159,19 @@ public class ETHElectricVoidMiners {
         public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
             return new EVMHV(mName);
         }
+
+        @Override
+        public String[] getToolTips() {
+            String[] lines = new String[7];
+            lines[0] = "512 EU/t"; // consume
+            lines[1] = "4 Ores"; // output items
+            lines[2] = "0.5 Second"; // cost time
+            lines[3] = "HV+, any base casing"; // energy hatch
+            lines[4] = "Any base casing"; // maintenance hatch
+            lines[5] = "Ores, optional, any base casing"; // input bus
+            lines[6] = ""; // input hatch
+            return lines;
+        }
     }
 
     public static class EVMIV extends ETHVoidMinerBase {
@@ -212,6 +240,19 @@ public class ETHElectricVoidMiners {
         @Override
         public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
             return new EVMIV(mName);
+        }
+
+        @Override
+        public String[] getToolTips() {
+            String[] lines = new String[7];
+            lines[0] = "8192 EU/t"; // consume
+            lines[1] = "8 Ores"; // output items
+            lines[2] = "0.5 Second"; // cost time
+            lines[3] = "IV+, any base casing"; // energy hatch
+            lines[4] = "Any base casing"; // maintenance hatch
+            lines[5] = "Ores, optional, any base casing"; // input bus
+            lines[6] = ""; // input hatch
+            return lines;
         }
     }
 }
