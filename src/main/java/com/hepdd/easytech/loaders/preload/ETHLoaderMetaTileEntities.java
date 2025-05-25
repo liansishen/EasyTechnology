@@ -59,39 +59,49 @@ public class ETHLoaderMetaTileEntities implements Runnable {
     private static void registerMultiblockControllers() {
         int intMachineID = 2800;
         ETHItemList.Machine_Large_Bricked_BlastFurnace.set(
-            new ETHLargeBlastFurnace(intMachineID++, "multimachine.largebrickedblastfurnace", "大型砖高炉")
-                .getStackForm(1L));
+            new ETHLargeBlastFurnace(
+                intMachineID++,
+                "multimachine.largebrickedblastfurnace",
+                "Large Bricked Blast Furnace").getStackForm(1L));
 
-        ETHItemList.Machine_Large_Coke_Oven
-            .set(new ETHLargeCokeOven(intMachineID++, "multimachine.largecokeoven", "大型焦炉").getStackForm(1L));
+        ETHItemList.Machine_Large_Coke_Oven.set(
+            new ETHLargeCokeOven(intMachineID++, "multimachine.largecokeoven", "Large Coke Oven").getStackForm(1L));
 
         ETHItemList.Machine_Primitive_Void_Miner.set(
-            new ETHPrimitiveVoidMiner(intMachineID++, "multimachine.primitivevoidminer", "原始虚空矿机").getStackForm(1L));
+            new ETHPrimitiveVoidMiner(intMachineID++, "multimachine.primitivevoidminer", "Primitive Void Miner")
+                .getStackForm(1L));
 
-        ETHItemList.Machine_Steam_Void_Miner
-            .set(new ETHSteamVoidMiner(intMachineID++, "multimachine.steamvoidminer", "蒸汽虚空矿机").getStackForm(1L));
+        ETHItemList.Machine_Steam_Void_Miner.set(
+            new ETHSteamVoidMiner(intMachineID++, "multimachine.steamvoidminer", "Steam Void Miner").getStackForm(1L));
 
         ETHItemList.Machine_LV_Void_Miner.set(
-            new ETHElectricVoidMiners.EVMLV(intMachineID++, "multimachine.lvvoidminer", "低压虚空矿机").getStackForm(1L));
+            new ETHElectricVoidMiners.EVMLV(intMachineID++, "multimachine.lvvoidminer", "LV Void Miner")
+                .getStackForm(1L));
 
         ETHItemList.Machine_HV_Void_Miner.set(
-            new ETHElectricVoidMiners.EVMHV(intMachineID++, "multimachine.hvvoidminer", "高压虚空矿机").getStackForm(1L));
+            new ETHElectricVoidMiners.EVMHV(intMachineID++, "multimachine.hvvoidminer", "HV Void Miner")
+                .getStackForm(1L));
 
         ETHItemList.Machine_IV_Void_Miner.set(
-            new ETHElectricVoidMiners.EVMIV(intMachineID++, "multimachine.ivvoidminer", "强导压虚空矿机").getStackForm(1L));
+            new ETHElectricVoidMiners.EVMIV(intMachineID++, "multimachine.ivvoidminer", "IV Void Miner")
+                .getStackForm(1L));
     }
 
     private static void registerHatch() {
-        ETHItemList.Hatch_Input_Primitive
-            .set(new ETHPrimitiveHatchInput(4000, 1, "hatch.input.tier.primitive", "原始输入仓", 0).getStackForm(1L));
+        ETHItemList.Hatch_Input_Primitive.set(
+            new ETHPrimitiveHatchInput(4000, 1, "hatch.input.tier.primitive", "Primitive Input Hatch", 0)
+                .getStackForm(1L));
 
-        ETHItemList.Hatch_Output_Primitive
-            .set(new ETHPrimitiveHatchOutput(4001, "hatch.output.tier.primitive", "原始输出仓", 0).getStackForm(1L));
+        ETHItemList.Hatch_Output_Primitive.set(
+            new ETHPrimitiveHatchOutput(4001, "hatch.output.tier.primitive", "Primitive Output Hatch", 0)
+                .getStackForm(1L));
 
-        ETHItemList.Hatch_Input_Bus_Primitive
-            .set(new ETHPrimitiveHatchInputBus(4002, "hatch.inputbus.tier.primitive", "原始输入总线", 0).getStackForm(1L));
+        ETHItemList.Hatch_Input_Bus_Primitive.set(
+            new ETHPrimitiveHatchInputBus(4002, "hatch.inputbus.tier.primitive", "Primitive Input Bus", 0)
+                .getStackForm(1L));
 
-        ETHItemList.Hatch_Output_Bus_Primitive
-            .set(new ETHPrimitiveHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "原始输出总线", 0).getStackForm(1L));
+        ETHItemList.Hatch_Output_Bus_Primitive.set(
+            new ETHPrimitiveHatchOutputBus(4003, "hatch.outputbus.tier.primitive", "Primitive Output Bus", 0)
+                .getStackForm(1L));
     }
 }

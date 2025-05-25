@@ -1,0 +1,11 @@
+gt.blockmachines.multimachine.largebrickedblastfurnace.name=Large Bricked Blast Furnace
+gt.blockmachines.multimachine.largecokeoven.name=Large Coke Oven
+gt.blockmachines.multimachine.primitivevoidminer.name=Primitive Void Miner
+gt.blockmachines.multimachine.steamvoidminer.name=Steam Void Miner
+gt.blockmachines.multimachine.lvvoidminer.name=LV Void Miner
+gt.blockmachines.multimachine.hvvoidminer.name=HV Void Miner
+gt.blockmachines.multimachine.ivvoidminer.name=IV Void Miner
+gt.blockmachines.hatch.input.tier.primitive.name=Primitive Input Hatch
+gt.blockmachines.hatch.output.tier.primitive.name=Primitive Output Hatch
+gt.blockmachines.hatch.inputbus.tier.primitive.name=Primitive Input Bus
+gt.blockmachines.hatch.outputbus.tier.primitive.name=Primitive Output Bus

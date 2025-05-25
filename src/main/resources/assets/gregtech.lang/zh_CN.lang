@@ -1,0 +1,11 @@
+gt.blockmachines.multimachine.largebrickedblastfurnace.name=大型砖高炉
+gt.blockmachines.multimachine.largecokeoven.name=大型焦炉
+gt.blockmachines.multimachine.primitivevoidminer.name=原始虚空矿机
+gt.blockmachines.multimachine.steamvoidminer.name=蒸汽虚空矿机
+gt.blockmachines.multimachine.lvvoidminer.name=低压虚空矿机
+gt.blockmachines.multimachine.hvvoidminer.name=高压虚空矿机
+gt.blockmachines.multimachine.ivvoidminer.name=强导压虚空矿机
+gt.blockmachines.hatch.input.tier.primitive.name=原始输入仓
+gt.blockmachines.hatch.output.tier.primitive.name=原始输出仓
+gt.blockmachines.hatch.inputbus.tier.primitive.name=原始输入总线
+gt.blockmachines.hatch.outputbus.tier.primitive.name=原始输出总线
