@@ -26,7 +26,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.shutdown.ShutDownReasonRegistry;
-import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 
 public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
 
@@ -143,7 +142,7 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     }
 
     @Override
-    protected List<IHatchElement<? super MTEDrillerBase>> getAllowedHatches() {
+    protected List<IHatchElement<? super ETHVoidMinerBase>> getAllowedHatches() {
         return ImmutableList.of(InputBus, OutputBus);
     }
 

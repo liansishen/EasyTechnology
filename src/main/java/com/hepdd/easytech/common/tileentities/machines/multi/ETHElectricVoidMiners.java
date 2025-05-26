@@ -1,7 +1,5 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
-import static gregtech.api.enums.HatchElement.*;
-
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 

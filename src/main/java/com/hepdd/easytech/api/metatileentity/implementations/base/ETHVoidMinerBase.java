@@ -1,7 +1,14 @@
 package com.hepdd.easytech.api.metatileentity.implementations.base;
 
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.*;
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
 import static com.hepdd.easytech.loaders.preload.ETHStatics.*;
+import static gregtech.api.enums.GTValues.W;
 import static gregtech.api.enums.HatchElement.*;
+import static gregtech.api.enums.Textures.BlockIcons.*;
+import static gregtech.api.metatileentity.BaseTileEntity.TOOLTIP_DELAY;
+import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
+import static gregtech.api.util.GTStructureUtility.ofFrame;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,11 +18,15 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
@@ -24,32 +35,45 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.gtnewhorizon.structurelib.alignment.IAlignmentLimits;
+import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
+import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
+import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+import com.gtnewhorizons.modularui.api.drawable.IDrawable;
 import com.gtnewhorizons.modularui.api.math.Alignment;
+import com.gtnewhorizons.modularui.api.math.Pos2d;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
-import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
+import com.gtnewhorizons.modularui.common.widget.*;
 
-import bwcrossmod.galacticgreg.MTEVoidMinerBase;
 import bwcrossmod.galacticgreg.VoidMinerUtility;
 import gregtech.api.GregTechAPI;
+import gregtech.api.enums.ItemList;
+import gregtech.api.enums.Materials;
 import gregtech.api.enums.OrePrefixes;
+import gregtech.api.gui.modularui.GTUITextures;
+import gregtech.api.gui.widgets.LockedWhileActiveButton;
+import gregtech.api.interfaces.IChunkLoader;
 import gregtech.api.interfaces.IHatchElement;
+import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
+import gregtech.api.objects.GTChunkManager;
 import gregtech.api.objects.XSTR;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
+import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.SimpleShutDownReason;
 import gregtech.common.WorldgenGTOreLayer;
-import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 import gtneioreplugin.plugin.item.ItemDimensionDisplay;
 import gtneioreplugin.util.DimensionHelper;
 
-public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
+public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoidMinerBase>
+    implements IChunkLoader, ISurvivalConstructable {
 
     private VoidMinerUtility.DropMap dropMap = null;
     private VoidMinerUtility.DropMap extraDropMap = null;
@@ -58,13 +82,72 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     private int oreType;
     private boolean mBlacklist = false;
     private String dimensionName = "";
+    private Block casingBlock;
+    private int casingMeta;
+    private int frameMeta;
+    protected int casingTextureIndex;
+    protected boolean mChunkLoadingEnabled = true;
+    protected ChunkCoordIntPair mCurrentChunk = null;
+    protected boolean mWorkChunkNeedsReload = true;
+    // private @NotNull String shutdownReason = "";
+    protected static final String STRUCTURE_PIECE_MAIN = "main";
+    protected static final ClassValue<IStructureDefinition<ETHVoidMinerBase>> STRUCTURE_DEFINITION = new ClassValue<>() {
+
+        @Override
+        protected IStructureDefinition<ETHVoidMinerBase> computeValue(Class<?> type) {
+            return StructureDefinition.<ETHVoidMinerBase>builder()
+                .addShape(
+                    STRUCTURE_PIECE_MAIN,
+                    transpose(
+                        new String[][] { { "   ", " f ", "   " }, { "   ", " f ", "   " }, { "   ", " f ", "   " },
+                            { " f ", "fcf", " f " }, { " f ", "fcf", " f " }, { " f ", "fcf", " f " },
+                            { "b~b", "bbb", "bbb" }, }))
+                .addElement('f', lazy(t -> ofFrame(t.getFrameMaterial())))
+                .addElement(
+                    'c',
+                    lazy(
+                        t -> ofBlock(
+                            t.getCasingBlockItem()
+                                .getBlock(),
+                            t.getCasingBlockItem()
+                                .get(0)
+                                .getItemDamage())))
+                .addElement(
+                    'b',
+                    lazy(
+                        t -> buildHatchAdder(ETHVoidMinerBase.class).atLeastList(t.getAllowedHatches())
+                            .adder(ETHVoidMinerBase::addToMachineList)
+                            .casingIndex(t.casingTextureIndex)
+                            .dot(1)
+                            .buildAndChain(
+                                t.getCasingBlockItem()
+                                    .getBlock(),
+                                t.getCasingBlockItem()
+                                    .get(0)
+                                    .getItemDamage())))
+                .build();
+        }
+    };
 
     public ETHVoidMinerBase(int aID, String aName, String aNameRegional, int tier) {
-        super(aID, aName, aNameRegional, tier);
+        super(aID, aName, aNameRegional);
+        initFields();
     }
 
     public ETHVoidMinerBase(String aName, int tier) {
-        super(aName, tier);
+        super(aName);
+        initFields();
+    }
+
+    private void initFields() {
+        casingBlock = getCasingBlockItem().getBlock();
+        casingMeta = getCasingBlockItem().get(0)
+            .getItemDamage();
+        int frameId = 4096 + getFrameMaterial().mMetaItemSubID;
+        frameMeta = GregTechAPI.METATILEENTITIES[frameId] != null
+            ? GregTechAPI.METATILEENTITIES[frameId].getTileEntityBaseType()
+            : W;
+        casingTextureIndex = getCasingTextureIndex();
     }
 
     @Override
@@ -86,6 +169,14 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     }
 
     public abstract String[] getToolTips();
+
+    public abstract void setElectricityStats();
+
+    public abstract Materials getFrameMaterial();
+
+    protected abstract ItemList getCasingBlockItem();
+
+    public abstract int getCasingTextureIndex();
 
     protected boolean workingAtBottom() {
         // if the dropMap has never been initialised or if the dropMap is empty
@@ -116,6 +207,180 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     @Override
     public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
         return checkPiece(STRUCTURE_PIECE_MAIN, 1, 6, 0) && checkHatches();
+    }
+
+    public boolean checkHatches() {
+        return true;
+    }
+
+    @Override
+    public ITexture[] getTexture(IGregTechTileEntity baseMetaTileEntity, ForgeDirection sideDirection,
+        ForgeDirection facingDirection, int colorIndex, boolean active, boolean redstoneLevel) {
+        if (sideDirection == facingDirection) {
+            if (active) return new ITexture[] { getCasingTextureForId(casingTextureIndex), TextureFactory.builder()
+                .addIcon(OVERLAY_FRONT_ORE_DRILL_ACTIVE)
+                .extFacing()
+                .build(),
+                TextureFactory.builder()
+                    .addIcon(OVERLAY_FRONT_ORE_DRILL_ACTIVE_GLOW)
+                    .extFacing()
+                    .glow()
+                    .build() };
+            return new ITexture[] { getCasingTextureForId(casingTextureIndex), TextureFactory.builder()
+                .addIcon(OVERLAY_FRONT_ORE_DRILL)
+                .extFacing()
+                .build(),
+                TextureFactory.builder()
+                    .addIcon(OVERLAY_FRONT_ORE_DRILL_GLOW)
+                    .extFacing()
+                    .glow()
+                    .build() };
+        }
+        return new ITexture[] { getCasingTextureForId(casingTextureIndex) };
+    }
+
+    @Override
+    public void saveNBTData(NBTTagCompound aNBT) {
+        super.saveNBTData(aNBT);
+        aNBT.setBoolean("chunkLoadingEnabled", mChunkLoadingEnabled);
+        aNBT.setBoolean("isChunkloading", mCurrentChunk != null);
+        if (mCurrentChunk != null) {
+            aNBT.setInteger("loadedChunkXPos", mCurrentChunk.chunkXPos);
+            aNBT.setInteger("loadedChunkZPos", mCurrentChunk.chunkZPos);
+        }
+        aNBT.setString("mDimension", this.dimensionName);
+    }
+
+    @Override
+    public void loadNBTData(NBTTagCompound aNBT) {
+        super.loadNBTData(aNBT);
+        if (aNBT.hasKey("chunkLoadingEnabled")) mChunkLoadingEnabled = aNBT.getBoolean("chunkLoadingEnabled");
+        if (aNBT.getBoolean("isChunkloading")) {
+            mCurrentChunk = new ChunkCoordIntPair(
+                aNBT.getInteger("loadedChunkXPos"),
+                aNBT.getInteger("loadedChunkZPos"));
+        }
+        this.dimensionName = aNBT.getString("mDimension");
+    }
+
+    @Override
+    public void onRemoval() {
+        if (mChunkLoadingEnabled) GTChunkManager.releaseTicket((TileEntity) getBaseMetaTileEntity());
+        super.onRemoval();
+    }
+
+    @Override
+    public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
+        super.onPostTick(aBaseMetaTileEntity, aTick);
+        if (aBaseMetaTileEntity.isServerSide() && mCurrentChunk != null
+            && !mWorkChunkNeedsReload
+            && !aBaseMetaTileEntity.isAllowedToWork()) {
+            // if machine has stopped, stop chunkloading
+            GTChunkManager.releaseTicket((TileEntity) aBaseMetaTileEntity);
+            mWorkChunkNeedsReload = true;
+        }
+    }
+
+    @Override
+    protected IAlignmentLimits getInitialAlignmentLimits() {
+        return (d, r, f) -> (d.flag & (ForgeDirection.UP.flag | ForgeDirection.DOWN.flag)) == 0 && r.isNotRotated()
+            && !f.isVerticallyFliped();
+    }
+
+    @Override
+    public boolean isRotationChangeAllowed() {
+        return false;
+    }
+
+    @Override
+    public final IStructureDefinition<ETHVoidMinerBase> getStructureDefinition() {
+        return STRUCTURE_DEFINITION.get(getClass());
+    }
+
+    @Override
+    public boolean isCorrectMachinePart(ItemStack aStack) {
+        return true;
+    }
+
+    @Override
+    public int getMaxEfficiency(ItemStack aStack) {
+        return 10000;
+    }
+
+    @Override
+    public int getDamageToComponent(ItemStack aStack) {
+        return 0;
+    }
+
+    @Override
+    public boolean explodesOnComponentBreak(ItemStack aStack) {
+        return false;
+    }
+
+    @Override
+    public ChunkCoordIntPair getActiveChunk() {
+        return mCurrentChunk;
+    }
+
+    @Override
+    public void construct(ItemStack stackSize, boolean hintsOnly) {
+        buildPiece(STRUCTURE_PIECE_MAIN, stackSize, hintsOnly, 1, 6, 0);
+    }
+
+    @Override
+    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
+        if (mMachine) return -1;
+        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 1, 6, 0, elementBudget, env, false, true);
+    }
+
+    @Override
+    protected boolean showRecipeTextInGUI() {
+        return false;
+    }
+
+    protected List<ButtonWidget> getAdditionalButtons(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        super.addUIWidgets(builder, buildContext);
+        final int BUTTON_Y_LEVEL = 91;
+
+        builder.widget(
+            new LockedWhileActiveButton(this.getBaseMetaTileEntity(), builder)
+                .setOnClick((clickData, widget) -> mChunkLoadingEnabled = !mChunkLoadingEnabled)
+                .setPlayClickSound(true)
+                .setBackground(() -> {
+                    if (mChunkLoadingEnabled) {
+                        return new IDrawable[] { GTUITextures.BUTTON_STANDARD_PRESSED,
+                            GTUITextures.OVERLAY_BUTTON_CHUNK_LOADING };
+                    }
+                    return new IDrawable[] { GTUITextures.BUTTON_STANDARD,
+                        GTUITextures.OVERLAY_BUTTON_CHUNK_LOADING_OFF };
+                })
+                .attachSyncer(
+                    new FakeSyncWidget.BooleanSyncer(
+                        () -> mChunkLoadingEnabled,
+                        newBoolean -> mChunkLoadingEnabled = newBoolean),
+                    builder,
+                    (widget, val) -> widget.notifyTooltipChange())
+                .dynamicTooltip(
+                    () -> ImmutableList.of(
+                        StatCollector.translateToLocal(
+                            mChunkLoadingEnabled ? "GT5U.gui.button.chunk_loading_on"
+                                : "GT5U.gui.button.chunk_loading_off")))
+                .setTooltipShowUpDelay(TOOLTIP_DELAY)
+                .setPos(new Pos2d(80, BUTTON_Y_LEVEL))
+                .setSize(16, 16));
+
+        int left = 98;
+        for (ButtonWidget button : getAdditionalButtons(builder, buildContext)) {
+            button.setPos(new Pos2d(left, BUTTON_Y_LEVEL))
+                .setSize(16, 16);
+            builder.widget(button);
+            left += 18;
+        }
     }
 
     private ItemStack nextOre() {
@@ -300,8 +565,7 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
         };
     }
 
-    @Override
-    protected List<IHatchElement<? super MTEDrillerBase>> getAllowedHatches() {
+    protected List<IHatchElement<? super ETHVoidMinerBase>> getAllowedHatches() {
         return ImmutableList.of(InputBus, OutputBus, Maintenance, Energy);
     }
 
@@ -309,23 +573,6 @@ public abstract class ETHVoidMinerBase extends MTEVoidMinerBase {
     public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ) {
         this.mBlacklist = !this.mBlacklist;
         GTUtility.sendChatToPlayer(aPlayer, "Mode: " + (this.mBlacklist ? "Blacklist" : "Whitelist"));
-    }
-
-    @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        super.addUIWidgets(builder, buildContext);
-    }
-
-    @Override
-    public void saveNBTData(NBTTagCompound aNBT) {
-        super.saveNBTData(aNBT);
-        aNBT.setString("mDimension", this.dimensionName);
-    }
-
-    @Override
-    public void loadNBTData(NBTTagCompound aNBT) {
-        super.loadNBTData(aNBT);
-        this.dimensionName = aNBT.getString("mDimension");
     }
 
     @Override
