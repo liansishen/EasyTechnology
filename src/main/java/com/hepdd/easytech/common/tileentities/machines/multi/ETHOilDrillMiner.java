@@ -93,7 +93,7 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
                 int posX = tag.getInteger("posX");
                 int posZ = tag.getInteger("posZ");
                 workDim = DimensionManager.getWorld(dimID);
-                workChunk = workDim.getChunkFromChunkCoords(posX,posZ);
+                workChunk = workDim.getChunkFromChunkCoords(1,25);
             } else {
                 workDim = getBaseMetaTileEntity().getWorld();
                 workChunk = getBaseMetaTileEntity().getWorld().getChunkFromBlockCoords(getBaseMetaTileEntity().getXCoord(),getBaseMetaTileEntity().getZCoord());

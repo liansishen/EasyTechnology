@@ -14,8 +14,14 @@ import net.minecraft.world.World;
 
 import gregtech.api.items.GTGenericItem;
 import gregtech.api.util.GTUtility;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.fluids.FluidStack;
+
+import java.util.List;
+
+import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
 
 public class ETHVoidOilLocationCard extends GTGenericItem {
 
@@ -28,28 +34,38 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
         if (player.worldObj.isRemote) return itemStackIn;
         int dimId = worldIn.provider.dimensionId;
         int posX = 0,posZ = 0;
-        //ChunkCoordinates chunkCoordinates = player.playerLocation;
         if (player instanceof EntityPlayerMP entityPlayerMP) {
             posX = (int) entityPlayerMP.lastTickPosX;
             posZ = (int) entityPlayerMP.lastTickPosZ;
-            GTUtility.sendChatToPlayer(player, "dim:" + dimId + "x:" + posX + "z:" + posZ);
         }
+        World world = DimensionManager.getWorld(dimId);
+        Chunk chunk = world.getChunkFromBlockCoords(posX,posZ);
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("dimId",dimId);
-        tag.setInteger("posX",posX);
-        tag.setInteger("posZ",posZ);
+        tag.setInteger("posX",chunk.xPosition);
+        tag.setInteger("posZ",chunk.zPosition);
+        tag.setString("dimName",world.provider.getDimensionName());
+        FluidStack fs = undergroundOilReadInformation(chunk);
+        if (fs != null) {
+            tag.setString("fluid",fs.getLocalizedName());
+            tag.setInteger("fluidAmount",fs.amount);
+        } else {
+            tag.setString("fluid","无地下流体");
+        }
         itemStackIn.setTagCompound(tag);
-//        ChunkCoordIntPair chunkXZ;
-//        chunkXZ = new ChunkCoordIntPair(posX,posZ);
-//        if (player.isSneaking()) {
-//            GTChunkManagerEx.releaseChunk(player.worldObj.getTileEntity(37,4,334),chunkXZ);
-//            GTChunkManagerEx.releaseTicket(player.worldObj.getTileEntity(37,4,334));
-//            GTUtility.sendChatToPlayer(player, "chunk release");
-//            return itemStackIn;
-//        }
-//        GTChunkManagerEx.requestPlayerChunkLoad(player.worldObj.getTileEntity(37,4,334), chunkXZ,"",-1);
-//        GTUtility.sendChatToPlayer(player, "chunk loaded");
+        GTUtility.sendChatToPlayer(player, "dim:" + dimId + "x:" + chunk.xPosition + "z:" + chunk.zPosition);
         return itemStackIn;
     }
 
+    @Override
+    protected void addAdditionalToolTips(List<String> aList, ItemStack aStack, EntityPlayer aPlayer) {
+        super.addAdditionalToolTips(aList, aStack, aPlayer);
+        NBTTagCompound tag = aStack.getTagCompound();
+        if (tag != null) {
+            int dimId = tag.getInteger("dimId");
+            aList.add("目标维度：" + tag.getString("dimName"));
+            aList.add("区块坐标：" + tag.getInteger("posX") + "," + tag.getInteger("posZ"));
+            aList.add("流体：" + tag.getString("fluid")+"("+tag.getInteger("fluidAmount")+")");
+        }
+    }
 }
