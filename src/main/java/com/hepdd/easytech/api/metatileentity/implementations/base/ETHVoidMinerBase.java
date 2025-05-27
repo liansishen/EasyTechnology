@@ -89,6 +89,7 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     protected boolean mChunkLoadingEnabled = true;
     protected ChunkCoordIntPair mCurrentChunk = null;
     protected boolean mWorkChunkNeedsReload = true;
+    private int xDrill,yDrill,zDrill;
     // private @NotNull String shutdownReason = "";
     protected static final String STRUCTURE_PIECE_MAIN = "main";
     protected static final ClassValue<IStructureDefinition<ETHVoidMinerBase>> STRUCTURE_DEFINITION = new ClassValue<>() {
@@ -178,7 +179,20 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
 
     public abstract int getCasingTextureIndex();
 
+    private void updateCoordinates() {
+        xDrill = getBaseMetaTileEntity().getXCoord();
+        yDrill = getBaseMetaTileEntity().getYCoord();
+        zDrill = getBaseMetaTileEntity().getZCoord();
+    }
+
     protected boolean workingAtBottom() {
+
+        if (mWorkChunkNeedsReload) {
+            mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
+            GTChunkManager.requestChunkLoad((TileEntity) getBaseMetaTileEntity(), null);
+            mWorkChunkNeedsReload = false;
+        }
+
         // if the dropMap has never been initialised or if the dropMap is empty
         if (this.dropMap == null || this.totalWeight == 0) this.calculateDropMap();
 
@@ -206,6 +220,7 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
 
     @Override
     public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
+        updateCoordinates();
         return checkPiece(STRUCTURE_PIECE_MAIN, 1, 6, 0) && checkHatches();
     }
 

@@ -17,11 +17,14 @@ public enum ETHItemList {
     Machine_LV_Void_Miner,
     Machine_HV_Void_Miner,
     Machine_IV_Void_Miner,
+    Machine_Test_Oil_Drill,
 
     Hatch_Input_Primitive,
     Hatch_Output_Primitive,
     Hatch_Input_Bus_Primitive,
     Hatch_Output_Bus_Primitive,
+
+    ITEM_Void_Oil_Location_Card,
 
     ;
 
