@@ -5,7 +5,6 @@ import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchIn
 import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchInputBus;
 import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchOutput;
 import com.hepdd.easytech.api.metatileentity.implementations.ETHPrimitiveHatchOutputBus;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 import com.hepdd.easytech.common.tileentities.machines.multi.*;
 
 import gregtech.api.enums.ItemList;
@@ -83,9 +82,8 @@ public class ETHLoaderMetaTileEntities implements Runnable {
             new ETHElectricVoidMiners.EVMIV(intMachineID++, "multimachine.ivvoidminer", "IV Void Miner")
                 .getStackForm(1L));
 
-        ETHItemList.Machine_Test_Oil_Drill.set(
-            new ETHOilDrillMiner(intMachineID++,"multimachine.testoildrill","test oil drill").getStackForm(1L)
-        );
+        ETHItemList.Machine_Test_Oil_Drill
+            .set(new ETHOilDrillMiner(intMachineID++, "multimachine.testoildrill", "test oil drill").getStackForm(1L));
     }
 
     private static void registerHatch() {

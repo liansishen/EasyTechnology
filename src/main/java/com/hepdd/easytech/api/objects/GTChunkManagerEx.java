@@ -1,12 +1,10 @@
 package com.hepdd.easytech.api.objects;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import gregtech.GTMod;
-import gregtech.api.enums.GTValues;
-import gregtech.api.interfaces.IChunkLoader;
-import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.util.GTLog;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -14,12 +12,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
-public class GTChunkManagerEx implements ForgeChunkManager.OrderedLoadingCallback, ForgeChunkManager.PlayerOrderedLoadingCallback{
+import gregtech.GTMod;
+import gregtech.api.enums.GTValues;
+import gregtech.api.interfaces.IChunkLoader;
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.util.GTLog;
+
+public class GTChunkManagerEx
+    implements ForgeChunkManager.OrderedLoadingCallback, ForgeChunkManager.PlayerOrderedLoadingCallback {
 
     private final Map<TileEntity, ForgeChunkManager.Ticket> registeredTickets = new HashMap<>();
     public static GTChunkManagerEx instance = new GTChunkManagerEx();
@@ -46,7 +49,8 @@ public class GTChunkManagerEx implements ForgeChunkManager.OrderedLoadingCallbac
      */
 
     @Override
-    public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world, int maxTicketCount) {
+    public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world,
+        int maxTicketCount) {
         List<ForgeChunkManager.Ticket> validTickets = new ArrayList<>();
         if (GTValues.alwaysReloadChunkloaders) {
             for (ForgeChunkManager.Ticket ticket : tickets) {
@@ -87,7 +91,8 @@ public class GTChunkManagerEx implements ForgeChunkManager.OrderedLoadingCallbac
      * @return the list of string-ticket paris
      */
     @Override
-    public ListMultimap<String, ForgeChunkManager.Ticket> playerTicketsLoaded(ListMultimap<String, ForgeChunkManager.Ticket> tickets, World world) {
+    public ListMultimap<String, ForgeChunkManager.Ticket> playerTicketsLoaded(
+        ListMultimap<String, ForgeChunkManager.Ticket> tickets, World world) {
         // Not currently used, so just return an empty list.
         return ArrayListMultimap.create();
     }
@@ -142,7 +147,8 @@ public class GTChunkManagerEx implements ForgeChunkManager.OrderedLoadingCallbac
         return true;
     }
 
-    public static boolean requestPlayerChunkLoad(TileEntity owner, ChunkCoordIntPair chunkXZ, String player,int dimId) {
+    public static boolean requestPlayerChunkLoad(TileEntity owner, ChunkCoordIntPair chunkXZ, String player,
+        int dimId) {
         if (!GTValues.enableChunkloaders) return false;
         if (!GTValues.alwaysReloadChunkloaders && chunkXZ == null) return false;
         if (GTValues.debugChunkloaders && chunkXZ != null)
@@ -153,8 +159,11 @@ public class GTChunkManagerEx implements ForgeChunkManager.OrderedLoadingCallbac
             ForgeChunkManager.Ticket ticket;
             if (player.isEmpty()) ticket = ForgeChunkManager
                 .requestTicket(GTMod.instance, DimensionManager.getWorld(dimId), ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager
-                .requestPlayerTicket(GTMod.instance, player, DimensionManager.getWorld(dimId), ForgeChunkManager.Type.NORMAL);
+            else ticket = ForgeChunkManager.requestPlayerTicket(
+                GTMod.instance,
+                player,
+                DimensionManager.getWorld(dimId),
+                ForgeChunkManager.Type.NORMAL);
             if (ticket == null) {
                 if (GTValues.debugChunkloaders)
                     GTLog.out.println("GTChunkManager: ForgeChunkManager.requestTicket failed");

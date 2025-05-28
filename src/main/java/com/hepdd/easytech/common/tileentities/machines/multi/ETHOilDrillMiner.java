@@ -1,18 +1,13 @@
 package com.hepdd.easytech.common.tileentities.machines.multi;
 
-import com.hepdd.easytech.api.objects.GTChunkManagerEx;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
-import gregtech.api.enums.ItemList;
-import gregtech.api.enums.Materials;
-import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
-import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.objects.GTChunkManager;
-import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.util.GTLog;
-import gregtech.api.util.MultiblockTooltipBuilder;
-import gregtech.api.util.ValidationResult;
-import gregtech.api.util.ValidationType;
-import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
+import static gregtech.api.enums.GTValues.debugDriller;
+import static gregtech.common.UndergroundOil.undergroundOil;
+import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
+
+import java.util.ArrayList;
+
+import javax.annotation.Nonnegative;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -24,12 +19,19 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
-import javax.annotation.Nonnegative;
-import java.util.ArrayList;
+import com.hepdd.easytech.api.objects.GTChunkManagerEx;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
-import static gregtech.api.enums.GTValues.debugDriller;
-import static gregtech.common.UndergroundOil.undergroundOil;
-import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
+import gregtech.api.enums.ItemList;
+import gregtech.api.enums.Materials;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.recipe.check.CheckRecipeResultRegistry;
+import gregtech.api.util.GTLog;
+import gregtech.api.util.MultiblockTooltipBuilder;
+import gregtech.api.util.ValidationResult;
+import gregtech.api.util.ValidationType;
+import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
 public class ETHOilDrillMiner extends MTEOilDrillBase {
 
@@ -83,30 +85,39 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
     }
 
     @Override
-    protected boolean workingAtBottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe, int yHead, int oldYHead) {
+    protected boolean workingAtBottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe,
+        int yHead, int oldYHead) {
         setElectricityStats();
-        int dimID=0;
-        if (getStoredInputs().get(0).getItem() instanceof ETHVoidOilLocationCard card) {
-            NBTTagCompound tag = getStoredInputs().get(0).getTagCompound();
+        int dimID = 0;
+        if (getStoredInputs().get(0)
+            .getItem() instanceof ETHVoidOilLocationCard card) {
+            NBTTagCompound tag = getStoredInputs().get(0)
+                .getTagCompound();
             if (tag != null) {
                 dimID = tag.getInteger("dimId");
                 int posX = tag.getInteger("posX");
                 int posZ = tag.getInteger("posZ");
                 workDim = DimensionManager.getWorld(dimID);
-                workChunk = workDim.getChunkFromChunkCoords(1,25);
+                workChunk = workDim.getChunkFromChunkCoords(1, 25);
             } else {
                 workDim = getBaseMetaTileEntity().getWorld();
-                workChunk = getBaseMetaTileEntity().getWorld().getChunkFromBlockCoords(getBaseMetaTileEntity().getXCoord(),getBaseMetaTileEntity().getZCoord());
+                workChunk = getBaseMetaTileEntity().getWorld()
+                    .getChunkFromBlockCoords(getBaseMetaTileEntity().getXCoord(), getBaseMetaTileEntity().getZCoord());
             }
         } else {
             workDim = getBaseMetaTileEntity().getWorld();
-            workChunk = getBaseMetaTileEntity().getWorld().getChunkFromBlockCoords(getBaseMetaTileEntity().getXCoord(),getBaseMetaTileEntity().getZCoord());
+            workChunk = getBaseMetaTileEntity().getWorld()
+                .getChunkFromBlockCoords(getBaseMetaTileEntity().getXCoord(), getBaseMetaTileEntity().getZCoord());
         }
 
         if (tryFillChunkList()) {
             if (mWorkChunkNeedsReload) {
                 mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
-                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) getBaseMetaTileEntity(), workChunk.getChunkCoordIntPair(),"",dimID);
+                GTChunkManagerEx.requestPlayerChunkLoad(
+                    (TileEntity) getBaseMetaTileEntity(),
+                    workChunk.getChunkCoordIntPair(),
+                    "",
+                    dimID);
                 mWorkChunkNeedsReload = false;
             }
             float speed = computeSpeed();
