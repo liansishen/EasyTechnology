@@ -82,7 +82,12 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     private VoidMinerUtility.DropMap dropMap = null;
     private VoidMinerUtility.DropMap extraDropMap = null;
     private float totalWeight;
-    private int multiplier;
+
+    public float getTotalWeight() {
+        return totalWeight;
+    }
+
+    public int multiplier;
     private int oreType;
     private boolean mBlacklist = false;
     private String dimensionName = "";
@@ -163,10 +168,6 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
         wasSuccessful = workingAtBottom();
         if (wasSuccessful) return SimpleCheckRecipeResult.ofSuccess("drilling");
         return SimpleCheckRecipeResult.ofFailure("none");
-    }
-
-    public void setMultiplier(int tier) {
-        this.multiplier = tier;
     }
 
     public void setOreType(int type) {
