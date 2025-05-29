@@ -1,15 +1,9 @@
 package com.hepdd.easytech.mixins;
 
-import com.hepdd.easytech.api.objects.GTChunkManagerEx;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
-import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.objects.GTChunkManager;
-import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.util.ValidationResult;
-import gregtech.api.util.ValidationType;
-import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
-import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
+import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
+
+import java.util.ArrayList;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -20,6 +14,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,9 +22,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
+import com.hepdd.easytech.api.objects.GTChunkManagerEx;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
-import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.recipe.check.CheckRecipeResultRegistry;
+import gregtech.api.util.ValidationResult;
+import gregtech.api.util.ValidationType;
+import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
+import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
 @Mixin(value = MTEOilDrillBase.class, remap = false)
 public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
@@ -39,6 +40,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
 
     @Shadow
     protected abstract ValidationResult<FluidStack> tryPumpOil(float speed);
+
     @Shadow
     private final ArrayList<Chunk> mOilFieldChunks = new ArrayList<>();
     @Shadow
@@ -49,12 +51,13 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
     private World easyTechnology$workDim;
     private int mOilFlow = 0;
 
-    @Inject(method = "workingAtBottom", at=@At("HEAD"),cancellable = true)
-    private void onWorkAtbottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe, int yHead, int oldYHead, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "workingAtBottom", at = @At("HEAD"), cancellable = true)
+    private void onWorkAtbottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe, int yHead,
+        int oldYHead, CallbackInfoReturnable<Boolean> cir) {
         int dimID = 0;
-        IGregTechTileEntity gregTechTile = ((MTEDrillerBase)(Object)this).getBaseMetaTileEntity();
+        IGregTechTileEntity gregTechTile = ((MTEDrillerBase) (Object) this).getBaseMetaTileEntity();
         setElectricityStats();
-        ItemStack is = ((MTEDrillerBase)(Object)this).getStackInSlot(1);
+        ItemStack is = ((MTEDrillerBase) (Object) this).getStackInSlot(1);
         if (is != null) {
             if (is.getItem() instanceof ETHVoidOilLocationCard) {
                 NBTTagCompound tag = is.getTagCompound();
@@ -79,7 +82,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         if (easyTechnology$onTryFillChunkList()) {
             if (mWorkChunkNeedsReload) {
                 mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
-                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, null,"");
+                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, null, "");
                 mWorkChunkNeedsReload = false;
             }
 
@@ -91,8 +94,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
                 return;
             }
             FluidStack tFluid = pumpResult.getResult();
-            if (tFluid != null && tFluid.amount > ((MTEDrillerBase)(Object)this).getTotalConfigValue()) {
-                ((MTEDrillerBase)(Object)this).mOutputFluids = new FluidStack[] { tFluid };
+            if (tFluid != null && tFluid.amount > ((MTEDrillerBase) (Object) this).getTotalConfigValue()) {
+                ((MTEDrillerBase) (Object) this).mOutputFluids = new FluidStack[] { tFluid };
                 cir.setReturnValue(true);
                 return;
             }
@@ -102,7 +105,6 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         this.setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
         cir.setReturnValue(true);
     }
-
 
     @Unique
     private boolean easyTechnology$onTryFillChunkList() {
