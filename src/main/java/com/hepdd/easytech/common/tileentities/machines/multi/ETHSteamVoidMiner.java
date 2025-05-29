@@ -78,8 +78,8 @@ public class ETHSteamVoidMiner extends ETHVoidMinerBase {
         this.mOutputItems = new ItemStack[0];
         this.mProgresstime = 0;
         this.mMaxProgresstime = 20; // 1s
-        this.mEUt = -4; // 80mB Steam/t
-        setMultiplier(4);
+        this.mEUt = -2; // 20L Steam/t
+        this.multiplier = 2;
     }
 
     @Override
@@ -159,8 +159,8 @@ public class ETHSteamVoidMiner extends ETHVoidMinerBase {
     @Override
     public String[] getToolTips() {
         String[] lines = new String[7];
-        lines[0] = "40L steam/t"; // consume
-        lines[1] = "4 Raw Ores"; // output items
+        lines[0] = "20L steam/t"; // consume
+        lines[1] = "2 Raw Ores"; // output items
         lines[2] = "1 Second"; // cost time
         lines[3] = ""; // energy hatch
         lines[4] = ""; // maintenance hatch

@@ -97,6 +97,13 @@ public class ETHLoaderRecipe implements Runnable {
                 OrePrefixes.plate.get(Materials.Iron), 'C', OrePrefixes.plate.get(Materials.Tin), 'D',
                 new ItemStack(Blocks.glass, 1) });
 
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.ITEM_Void_Oil_Location_Card.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "ABA", "BCB", "ABA", 'A', new ItemStack(Items.redstone, 1), 'B',
+                OrePrefixes.plate.get(Materials.Bronze), 'C', OrePrefixes.plate.get(Materials.Iron) });
+
     }
 
     public void registerCokeOvenRecipes() {

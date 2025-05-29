@@ -72,7 +72,7 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
         this.mProgresstime = 0;
         this.mMaxProgresstime = 40; // 2s
         this.mEUt = -1;
-        setMultiplier(4);
+        this.multiplier = 2;
     }
 
     @Override
@@ -150,7 +150,7 @@ public class ETHPrimitiveVoidMiner extends ETHVoidMinerBase {
     public String[] getToolTips() {
         String[] lines = new String[7];
         lines[0] = "based on fuel's burn time"; // consume
-        lines[1] = "4 Raw Ores"; // output items
+        lines[1] = "2 Raw Ores"; // output items
         lines[2] = "2 Seconds"; // cost time
         lines[3] = ""; // energy hatch
         lines[4] = ""; // maintenance hatch

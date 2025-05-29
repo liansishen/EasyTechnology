@@ -9,3 +9,4 @@ gt.blockmachines.hatch.input.tier.primitive.name=Primitive Input Hatch
 gt.blockmachines.hatch.output.tier.primitive.name=Primitive Output Hatch
 gt.blockmachines.hatch.input_bus.tier.primitive.name=Primitive Input Bus
 gt.blockmachines.hatch.output_bus.tier.primitive.name=Primitive Output Bus
+gt.item.voidoillocationcard.name=Void Oil Location Card

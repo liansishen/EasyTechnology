@@ -3,6 +3,7 @@ package com.hepdd.easytech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
 import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
 
@@ -38,6 +39,7 @@ public class EasyTechnology {
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
         new ETHLoaderMetaTileEntities().run();
+        new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
     }
 

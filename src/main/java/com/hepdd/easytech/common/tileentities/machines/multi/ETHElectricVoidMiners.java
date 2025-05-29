@@ -42,7 +42,7 @@ public class ETHElectricVoidMiners {
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
             this.mEUt = -32; // 32eu/t
-            setMultiplier(2);
+            this.multiplier = 1;
             setOreType(1); // OreBlock
         }
 
@@ -80,7 +80,7 @@ public class ETHElectricVoidMiners {
         public String[] getToolTips() {
             String[] lines = new String[7];
             lines[0] = "32 EU/t"; // consume
-            lines[1] = "2 Ores"; // output items
+            lines[1] = "1 Ores"; // output items
             lines[2] = "0.5 Second"; // cost time
             lines[3] = "LV+, any base casing"; // energy hatch
             lines[4] = "Any base casing"; // maintenance hatch
@@ -124,7 +124,7 @@ public class ETHElectricVoidMiners {
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
             this.mEUt = -512; // 512eu/t
-            setMultiplier(4);
+            this.multiplier = 2;
             setOreType(1); // OreBlock
         }
 
@@ -162,7 +162,7 @@ public class ETHElectricVoidMiners {
         public String[] getToolTips() {
             String[] lines = new String[7];
             lines[0] = "512 EU/t"; // consume
-            lines[1] = "4 Ores"; // output items
+            lines[1] = "2 Ores"; // output items
             lines[2] = "0.5 Second"; // cost time
             lines[3] = "HV+, any base casing"; // energy hatch
             lines[4] = "Any base casing"; // maintenance hatch
@@ -206,7 +206,7 @@ public class ETHElectricVoidMiners {
             this.mProgresstime = 0;
             this.mMaxProgresstime = 10; // 0.5s
             this.mEUt = -8192; // 8192eu/t
-            setMultiplier(8);
+            this.multiplier = 4;
             setOreType(1); // OreBlock
         }
 
@@ -244,7 +244,7 @@ public class ETHElectricVoidMiners {
         public String[] getToolTips() {
             String[] lines = new String[7];
             lines[0] = "8192 EU/t"; // consume
-            lines[1] = "8 Ores"; // output items
+            lines[1] = "4 Ores"; // output items
             lines[2] = "0.5 Second"; // cost time
             lines[3] = "IV+, any base casing"; // energy hatch
             lines[4] = "Any base casing"; // maintenance hatch

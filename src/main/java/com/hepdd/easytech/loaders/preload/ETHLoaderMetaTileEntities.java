@@ -85,6 +85,7 @@ public class ETHLoaderMetaTileEntities implements Runnable {
         ETHItemList.Machine_IV_Void_Miner.set(
             new ETHElectricVoidMiners.EVMIV(intMachineID++, "multimachine.ivvoidminer", "IV Void Miner")
                 .getStackForm(1L));
+
     }
 
     private static void registerHatch() {

@@ -45,7 +45,11 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.math.Pos2d;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.*;
+import com.gtnewhorizons.modularui.common.widget.ButtonWidget;
+import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
+import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
+import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import bwcrossmod.galacticgreg.VoidMinerUtility;
 import gregtech.api.GregTechAPI;
@@ -78,7 +82,12 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     private VoidMinerUtility.DropMap dropMap = null;
     private VoidMinerUtility.DropMap extraDropMap = null;
     private float totalWeight;
-    private int multiplier;
+
+    public float getTotalWeight() {
+        return totalWeight;
+    }
+
+    public int multiplier;
     private int oreType;
     private boolean mBlacklist = false;
     private String dimensionName = "";
@@ -89,6 +98,7 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     protected boolean mChunkLoadingEnabled = true;
     protected ChunkCoordIntPair mCurrentChunk = null;
     protected boolean mWorkChunkNeedsReload = true;
+    private int xDrill, yDrill, zDrill;
     // private @NotNull String shutdownReason = "";
     protected static final String STRUCTURE_PIECE_MAIN = "main";
     protected static final ClassValue<IStructureDefinition<ETHVoidMinerBase>> STRUCTURE_DEFINITION = new ClassValue<>() {
@@ -160,10 +170,6 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
         return SimpleCheckRecipeResult.ofFailure("none");
     }
 
-    public void setMultiplier(int tier) {
-        this.multiplier = tier;
-    }
-
     public void setOreType(int type) {
         this.oreType = type;
     }
@@ -178,7 +184,20 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
 
     public abstract int getCasingTextureIndex();
 
+    private void updateCoordinates() {
+        xDrill = getBaseMetaTileEntity().getXCoord();
+        yDrill = getBaseMetaTileEntity().getYCoord();
+        zDrill = getBaseMetaTileEntity().getZCoord();
+    }
+
     protected boolean workingAtBottom() {
+
+        if (mWorkChunkNeedsReload) {
+            mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
+            GTChunkManager.requestChunkLoad((TileEntity) getBaseMetaTileEntity(), null);
+            mWorkChunkNeedsReload = false;
+        }
+
         // if the dropMap has never been initialised or if the dropMap is empty
         if (this.dropMap == null || this.totalWeight == 0) this.calculateDropMap();
 
@@ -206,6 +225,7 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
 
     @Override
     public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
+        updateCoordinates();
         return checkPiece(STRUCTURE_PIECE_MAIN, 1, 6, 0) && checkHatches();
     }
 

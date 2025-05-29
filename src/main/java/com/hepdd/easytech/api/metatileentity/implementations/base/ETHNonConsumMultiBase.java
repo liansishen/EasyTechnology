@@ -74,7 +74,7 @@ public abstract class ETHNonConsumMultiBase<T extends ETHNonConsumMultiBase<T>> 
     public abstract void construct(ItemStack stackSize, boolean hintsOnly);
 
     @Override
-    public abstract IStructureDefinition getStructureDefinition();
+    public abstract IStructureDefinition<T> getStructureDefinition();
 
     @Override
     protected abstract MultiblockTooltipBuilder createTooltip();
