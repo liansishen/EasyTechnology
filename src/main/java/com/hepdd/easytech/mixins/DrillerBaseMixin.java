@@ -79,12 +79,11 @@ public abstract class DrillerBaseMixin {
         at = @At(
             value = "INVOKE",
             target = "Lcom/gtnewhorizons/modularui/api/screen/ModularWindow$Builder;widget(Lcom/gtnewhorizons/modularui/api/widget/Widget;)Lcom/gtnewhorizons/modularui/api/widget/IWidgetBuilder;",
-            ordinal = 0 // 第一个 widget() 调用
+            ordinal = 0
         ),
         cancellable = true)
     private void skipWidgetBlock(CallbackInfo ci) {
-        ci.cancel(); // 取消原方法执行
-        // 这里可以添加你想保留的逻辑
+        ci.cancel();
     }
 
 }

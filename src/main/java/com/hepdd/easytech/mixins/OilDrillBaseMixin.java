@@ -49,31 +49,24 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
     private Chunk easyTechnology$workChunk;
     @Unique
     private World easyTechnology$workDim;
-    private int mOilFlow = 0;
 
     @Inject(method = "workingAtBottom", at = @At("HEAD"), cancellable = true)
     private void onWorkAtbottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe, int yHead,
         int oldYHead, CallbackInfoReturnable<Boolean> cir) {
-        int dimID = 0;
         IGregTechTileEntity gregTechTile = ((MTEDrillerBase) (Object) this).getBaseMetaTileEntity();
         setElectricityStats();
         ItemStack is = ((MTEDrillerBase) (Object) this).getStackInSlot(1);
-        if (is != null) {
-            if (is.getItem() instanceof ETHVoidOilLocationCard) {
-                NBTTagCompound tag = is.getTagCompound();
-                if (tag != null) {
-                    dimID = tag.getInteger("dimId");
-                    int posX = tag.getInteger("posX");
-                    int posZ = tag.getInteger("posZ");
-                    easyTechnology$workDim = DimensionManager.getWorld(dimID);
-                    easyTechnology$workChunk = easyTechnology$workDim.getChunkFromChunkCoords(posX, posZ);
-                } else {
-                    easyTechnology$workDim = gregTechTile.getWorld();
-                    easyTechnology$workChunk = gregTechTile.getWorld()
-                        .getChunkFromBlockCoords(gregTechTile.getXCoord(), gregTechTile.getZCoord());
-                }
+        if (is != null && is.getItem() instanceof ETHVoidOilLocationCard) {
+            NBTTagCompound tag = is.getTagCompound();
+            if (tag != null) {
+                int dimID = tag.getInteger("dimId");
+                int posX = tag.getInteger("posX");
+                int posZ = tag.getInteger("posZ");
+                easyTechnology$workDim = DimensionManager.getWorld(dimID);
+                easyTechnology$workChunk = easyTechnology$workDim.getChunkFromChunkCoords(posX, posZ);
             }
-        } else {
+        }
+        if (easyTechnology$workDim == null) {
             easyTechnology$workDim = gregTechTile.getWorld();
             easyTechnology$workChunk = gregTechTile.getWorld()
                 .getChunkFromBlockCoords(gregTechTile.getXCoord(), gregTechTile.getZCoord());
@@ -82,7 +75,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         if (easyTechnology$onTryFillChunkList()) {
             if (mWorkChunkNeedsReload) {
                 mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
-                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, null, "");
+                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, null, "",easyTechnology$workDim.provider.dimensionId);
                 mWorkChunkNeedsReload = false;
             }
 
