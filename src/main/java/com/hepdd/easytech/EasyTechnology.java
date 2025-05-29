@@ -39,8 +39,8 @@ public class EasyTechnology {
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
         new ETHLoaderMetaTileEntities().run();
-        new ETHLoaderRecipe().run();
         new ETHLoaderItem().run();
+        new ETHLoaderRecipe().run();
     }
 
     @Mod.EventHandler

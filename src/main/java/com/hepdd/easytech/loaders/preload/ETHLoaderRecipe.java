@@ -98,7 +98,7 @@ public class ETHLoaderRecipe implements Runnable {
                 new ItemStack(Blocks.glass, 1) });
 
         GTModHandler.addCraftingRecipe(
-            ETHItemList.ITEM_Void_Oil_Location_Card.getInternalStack_unsafe(),
+            ETHItemList.ITEM_Void_Oil_Location_Card.get(1),
             GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
                 | GTModHandler.RecipeBits.BUFFERED,
             new Object[] { "ABA", "BCB", "ABA", 'A', new ItemStack(Items.redstone, 1), 'B',
