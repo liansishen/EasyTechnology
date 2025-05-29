@@ -27,6 +27,7 @@ import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationC
 
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.ValidationResult;
 import gregtech.api.util.ValidationType;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
@@ -56,7 +57,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         IGregTechTileEntity gregTechTile = ((MTEDrillerBase) (Object) this).getBaseMetaTileEntity();
         setElectricityStats();
         ItemStack is = ((MTEDrillerBase) (Object) this).getStackInSlot(1);
-        if (is != null && is.getItem() instanceof ETHVoidOilLocationCard) {
+        if (GTUtility.isStackValid(is) && is.getItem() instanceof ETHVoidOilLocationCard) {
             NBTTagCompound tag = is.getTagCompound();
             if (tag != null) {
                 int dimID = tag.getInteger("dimId");
@@ -75,7 +76,11 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         if (easyTechnology$onTryFillChunkList()) {
             if (mWorkChunkNeedsReload) {
                 mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
-                GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, null, "",easyTechnology$workDim.provider.dimensionId);
+                GTChunkManagerEx.requestPlayerChunkLoad(
+                    (TileEntity) gregTechTile,
+                    null,
+                    "",
+                    easyTechnology$workDim.provider.dimensionId);
                 mWorkChunkNeedsReload = false;
             }
 

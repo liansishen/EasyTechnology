@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
+import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 
 @Mixin(value = MTEDrillerBase.class, remap = false)
@@ -55,6 +56,7 @@ public abstract class DrillerBaseMixin {
     public void onCheckProcessing(CallbackInfoReturnable<CheckRecipeResult> cir) {
         this.setElectricityStats();
         if (!this.isEnergyEnough()) {
+            ((MTEDrillerBase) (Object) this).stopMachine(ShutDownReasonRegistry.NONE);
             cir.setReturnValue(SimpleCheckRecipeResult.ofFailure("not_enough_energy"));
             cir.cancel();
         }
@@ -79,8 +81,7 @@ public abstract class DrillerBaseMixin {
         at = @At(
             value = "INVOKE",
             target = "Lcom/gtnewhorizons/modularui/api/screen/ModularWindow$Builder;widget(Lcom/gtnewhorizons/modularui/api/widget/Widget;)Lcom/gtnewhorizons/modularui/api/widget/IWidgetBuilder;",
-            ordinal = 0
-        ),
+            ordinal = 0),
         cancellable = true)
     private void skipWidgetBlock(CallbackInfo ci) {
         ci.cancel();
