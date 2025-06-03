@@ -27,6 +27,9 @@ public class EasyTechnology {
     public static final String MODID = "easytech";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
+    @Mod.Instance("easytech")
+    public static EasyTechnology instance;
+
     @SidedProxy(clientSide = "com.hepdd.easytech.ClientProxy", serverSide = "com.hepdd.easytech.CommonProxy")
     public static CommonProxy proxy;
 
@@ -63,5 +66,6 @@ public class EasyTechnology {
         proxy.loadComplate(event);
         VoidMinerUtilityEx.generateDropMaps();
         new ETHStatics().run();
+        GuiHandler.init();
     }
 }

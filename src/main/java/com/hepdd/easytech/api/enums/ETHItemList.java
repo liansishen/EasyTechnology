@@ -24,6 +24,7 @@ public enum ETHItemList {
     Hatch_Output_Bus_Primitive,
 
     ITEM_Void_Oil_Location_Card,
+    ITEM_Portable_Crafting_Station,
 
     ;
 
