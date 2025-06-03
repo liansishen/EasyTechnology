@@ -3,13 +3,16 @@ package com.hepdd.easytech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
 import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
 import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
+import com.hepdd.easytech.loaders.preload.ETHStatics;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -55,4 +58,10 @@ public class EasyTechnology {
         proxy.serverStarting(event);
     }
 
+    @Mod.EventHandler
+    public void loadComplated(FMLLoadCompleteEvent event) {
+        proxy.loadComplate(event);
+        VoidMinerUtilityEx.generateDropMaps();
+        new ETHStatics().run();
+    }
 }

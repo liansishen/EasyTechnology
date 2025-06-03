@@ -41,9 +41,9 @@ public class ETHStatics implements Runnable {
         DimMap.put("Nether", "-1");
         DimMap.put("Overworld", "0");
         DimMap.put("TheEnd", "1");
-        DimMap.put("EndAsteroid", "1");
+        DimMap.put("EndAsteroids", "1");
         // Twilight Forest
-        DimMap.put("Twilight", "7");
+        DimMap.put("Twilight Forest", "7");
         // ross dims
         DimMap.put("Ross128b", String.valueOf(Configuration.crossModInteractions.ross128BID));
         DimMap.put("Ross128ba", String.valueOf(Configuration.crossModInteractions.ross128BAID));

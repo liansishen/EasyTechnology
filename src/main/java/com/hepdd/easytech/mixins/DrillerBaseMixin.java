@@ -67,7 +67,7 @@ public abstract class DrillerBaseMixin {
                 this.lastRuntimeFailure = null;
             }
 
-            cir.setReturnValue(SimpleCheckRecipeResult.ofSuccess("Drilling"));
+            cir.setReturnValue(SimpleCheckRecipeResult.ofSuccess("drilling"));
         } else {
             final CheckRecipeResult result;
             result = lastRuntimeFailure = runtimeFailure;

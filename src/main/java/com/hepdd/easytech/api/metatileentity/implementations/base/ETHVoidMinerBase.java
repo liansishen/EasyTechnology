@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.minecraft.block.Block;
@@ -50,12 +49,12 @@ import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
+import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
 
 import bwcrossmod.galacticgreg.VoidMinerUtility;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
-import gregtech.api.enums.OrePrefixes;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.gui.widgets.LockedWhileActiveButton;
 import gregtech.api.interfaces.IChunkLoader;
@@ -68,11 +67,9 @@ import gregtech.api.objects.XSTR;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.SimpleShutDownReason;
-import gregtech.common.WorldgenGTOreLayer;
 import gtneioreplugin.plugin.item.ItemDimensionDisplay;
 import gtneioreplugin.util.DimensionHelper;
 
@@ -439,24 +436,46 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
      * @param id the dim number
      */
     private void handleModDimDef(int id) {
-        if (VoidMinerUtility.dropMapsByDimId.containsKey(id)) {
-            this.dropMap = this.oreType == 0 ? getRawOreDropMapVanilla(id) : VoidMinerUtility.dropMapsByDimId.get(id);
-        } else {
-            String chunkProviderName = ((ChunkProviderServer) this.getBaseMetaTileEntity()
-                .getWorld()
-                .getChunkProvider()).currentChunkProvider.getClass()
-                    .getName();
+        if (this.oreType == 0) {
+            if (VoidMinerUtilityEx.rawDropMapsByDimId.containsKey(id)) {
+                this.dropMap = VoidMinerUtilityEx.rawDropMapsByDimId.get(id);
+            } else {
+                String chunkProviderName = ((ChunkProviderServer) this.getBaseMetaTileEntity()
+                    .getWorld()
+                    .getChunkProvider()).currentChunkProvider.getClass()
+                        .getName();
 
-            if (VoidMinerUtility.dropMapsByChunkProviderName.containsKey(chunkProviderName)) {
-                this.dropMap = VoidMinerUtility.dropMapsByChunkProviderName.get(chunkProviderName);
+                if (VoidMinerUtilityEx.rawDropMapsByChunkProviderName.containsKey(chunkProviderName)) {
+                    this.dropMap = VoidMinerUtilityEx.rawDropMapsByChunkProviderName.get(chunkProviderName);
+                }
+            }
+        } else {
+            if (VoidMinerUtility.dropMapsByDimId.containsKey(id)) {
+                this.dropMap = VoidMinerUtility.dropMapsByDimId.get(id);
+            } else {
+                String chunkProviderName = ((ChunkProviderServer) this.getBaseMetaTileEntity()
+                    .getWorld()
+                    .getChunkProvider()).currentChunkProvider.getClass()
+                        .getName();
+
+                if (VoidMinerUtility.dropMapsByChunkProviderName.containsKey(chunkProviderName)) {
+                    this.dropMap = VoidMinerUtility.dropMapsByChunkProviderName.get(chunkProviderName);
+                }
             }
         }
     }
 
     private void handleModDimDef(String chunkProviderName) {
-        if (VoidMinerUtility.dropMapsByChunkProviderName.containsKey(chunkProviderName)) {
-            this.dropMap = VoidMinerUtility.dropMapsByChunkProviderName.get(chunkProviderName);
+        if (this.oreType == 0) {
+            if (VoidMinerUtilityEx.rawDropMapsByChunkProviderName.containsKey(chunkProviderName)) {
+                this.dropMap = VoidMinerUtilityEx.rawDropMapsByChunkProviderName.get(chunkProviderName);
+            }
+        } else {
+            if (VoidMinerUtility.dropMapsByChunkProviderName.containsKey(chunkProviderName)) {
+                this.dropMap = VoidMinerUtility.dropMapsByChunkProviderName.get(chunkProviderName);
+            }
         }
+
     }
 
     /**
@@ -539,50 +558,6 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
         }
         sOreTable.put(tItem, false);
         return false;
-    }
-
-    private static VoidMinerUtility.DropMap getRawOreDropMapVanilla(int dimId) {
-        VoidMinerUtility.DropMap dropMap = new VoidMinerUtility.DropMap();
-
-        // Ore Veins
-        Predicate<WorldgenGTOreLayer> oreLayerPredicate = makeOreLayerPredicate(dimId);
-        WorldgenGTOreLayer.sList.stream()
-            .filter(gt_worldgen -> gt_worldgen.mEnabled && oreLayerPredicate.test(gt_worldgen))
-            .forEach(element -> {
-                dropMap.addDrop(
-                    GTOreDictUnificator
-                        .get(OrePrefixes.rawOre, GregTechAPI.sGeneratedMaterials[(element.mPrimaryMeta % 1000)], 1),
-                    element.mWeight);
-                dropMap.addDrop(
-                    GTOreDictUnificator
-                        .get(OrePrefixes.rawOre, GregTechAPI.sGeneratedMaterials[(element.mSecondaryMeta % 1000)], 1),
-                    element.mWeight);
-                dropMap.addDrop(
-                    GTOreDictUnificator
-                        .get(OrePrefixes.rawOre, GregTechAPI.sGeneratedMaterials[(element.mSporadicMeta % 1000)], 1),
-                    element.mWeight);
-                dropMap.addDrop(
-                    GTOreDictUnificator
-                        .get(OrePrefixes.rawOre, GregTechAPI.sGeneratedMaterials[(element.mBetweenMeta % 1000)], 1),
-                    element.mWeight);
-            });
-
-        return dropMap;
-    }
-
-    /**
-     * Makes a predicate for the GT normal ore veins worldgen
-     *
-     * @return the predicate
-     */
-    private static Predicate<WorldgenGTOreLayer> makeOreLayerPredicate(int dimensionId) {
-        return switch (dimensionId) {
-            case -1 -> gt_worldgen -> gt_worldgen.mNether;
-            case 0 -> gt_worldgen -> gt_worldgen.mOverworld;
-            case 1 -> gt_worldgen -> gt_worldgen.mEnd || gt_worldgen.mEndAsteroid;
-            case 7 -> gt_worldgen -> gt_worldgen.twilightForest;
-            default -> throw new IllegalStateException();
-        };
     }
 
     protected List<IHatchElement<? super ETHVoidMinerBase>> getAllowedHatches() {
