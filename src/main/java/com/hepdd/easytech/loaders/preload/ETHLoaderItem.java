@@ -16,6 +16,9 @@ public class ETHLoaderItem implements Runnable {
             .set(new ETHVoidOilLocationCard("item.voidoillocationcard", "Void Oil Location Card", "test"));
 
         ETHItemList.ITEM_Portable_Crafting_Station.set(
-            new ETHPortableCraftingStation("item.portablecraftingstation", "Portable Crafting Station", "test222"));
+            new ETHPortableCraftingStation(
+                "item.portablecraftingstation",
+                "Portable Crafting Station",
+                "可以方便的修武器和工具。"));
     }
 }
