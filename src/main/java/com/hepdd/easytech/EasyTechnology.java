@@ -1,13 +1,10 @@
 package com.hepdd.easytech;
 
+import com.hepdd.easytech.loaders.preload.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
-import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
-import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
-import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
-import com.hepdd.easytech.loaders.preload.ETHStatics;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -47,6 +44,7 @@ public class EasyTechnology {
         new ETHLoaderMetaTileEntities().run();
         new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
+        new ETHLoaderKeybind().run();
     }
 
     @Mod.EventHandler
