@@ -18,18 +18,12 @@ public class ETHPortableCraftingStation extends GTGenericItem {
     @Override
     public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
         if (!worldIn.isRemote) {
-            openGUI(player);
+            openGUI(player, player.inventory.currentItem);
         }
         return super.onItemRightClick(itemStackIn, worldIn, player);
     }
 
-    public void openGUI(EntityPlayer player) {
-        player.openGui(
-            EasyTechnology.instance,
-            GuiHandler.GUI1,
-            player.worldObj,
-            (int) player.posX,
-            (int) player.posY,
-            (int) player.posZ);
+    public void openGUI(EntityPlayer player, int slotId) {
+        player.openGui(EasyTechnology.instance, GuiHandler.GUI1, player.worldObj, slotId, 0, 0);
     }
 }

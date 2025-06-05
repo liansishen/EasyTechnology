@@ -5,7 +5,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
 import com.hepdd.easytech.common.ETHNetwork;
-import com.hepdd.easytech.loaders.preload.*;
+import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
+import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
+import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
+import com.hepdd.easytech.loaders.preload.ETHStatics;
 import com.hepdd.easytech.proxy.CommonProxy;
 import com.hepdd.easytech.proxy.GuiHandler;
 
@@ -49,7 +52,6 @@ public class EasyTechnology {
         new ETHLoaderMetaTileEntities().run();
         new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
-        new ETHLoaderKeybind().run();
         ETHStatics.NW = new ETHNetwork();
     }
 

@@ -48,7 +48,7 @@ public class PacketOpenCraftingStation extends GTPacket {
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
             ItemStack is = player.inventory.getStackInSlot(i);
             if (is != null && is.getItem() instanceof ETHPortableCraftingStation station) {
-                station.openGUI(player);
+                station.openGUI(player, i);
                 break;
             }
         }

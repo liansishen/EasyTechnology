@@ -4,11 +4,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 import com.hepdd.easytech.EasyTechnology;
+import com.hepdd.easytech.api.gui.PortableCraftingStationGui;
 import com.hepdd.easytech.api.objects.PortableCraftingStationContainer;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
-import tconstruct.tools.gui.CraftingStationGui;
 import tconstruct.tools.logic.CraftingStationLogic;
 
 public class GuiHandler implements IGuiHandler {
@@ -24,7 +24,7 @@ public class GuiHandler implements IGuiHandler {
         if (ID == GUI1) {
             CraftingStationLogic logic = new CraftingStationLogic();
             logic.setWorldObj(world);
-            return new PortableCraftingStationContainer(player.inventory, logic, x, y, z);
+            return new PortableCraftingStationContainer(player.inventory, logic, x);
         }
 
         return null;
@@ -35,7 +35,7 @@ public class GuiHandler implements IGuiHandler {
         if (ID == GUI1) {
             CraftingStationLogic logic = new CraftingStationLogic();
             logic.setWorldObj(world);
-            return new CraftingStationGui(player.inventory, logic, world, x, y, z);
+            return new PortableCraftingStationGui(player.inventory, logic, x);
         }
         return null;
     }
