@@ -31,7 +31,7 @@ import tconstruct.tools.logic.CraftingStationLogic;
 public class PortableCraftingStationContainer extends Container {
 
     private final World worldObj;
-
+    private final int openerSlot;
     @SuppressWarnings("rawtypes")
     private final WeakReference[] inventories;
 
@@ -46,6 +46,7 @@ public class PortableCraftingStationContainer extends Container {
 
     public PortableCraftingStationContainer(InventoryPlayer inventoryplayer, CraftingStationLogic logic, int slotId) {
         this.worldObj = logic.getWorldObj();
+        this.openerSlot = slotId;
         this.player = inventoryplayer.player;
         this.logic = logic;
         craftMatrix = new InventoryCraftingStation(this, 3, 3, logic);
@@ -78,7 +79,7 @@ public class PortableCraftingStationContainer extends Container {
         // Player Inventory 10 - 36
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                if (slotIndex == (slotId - 9)) {
+                if (slotIndex == (this.openerSlot - 9)) {
                     this.addSlotToContainer(
                         new Slot(inventoryplayer, col + row * 9 + 9, inventoryOffsetX + col * 18, 84 + row * 18) {
 
@@ -115,7 +116,7 @@ public class PortableCraftingStationContainer extends Container {
         slotIndex = 0;
         // Player Hotbar - 37 - 45
         for (col = 0; col < 9; ++col) {
-            if (slotIndex == slotId) {
+            if (slotIndex == this.openerSlot) {
                 this.addSlotToContainer(new Slot(inventoryplayer, col, inventoryOffsetX + col * 18, 142) {
 
                     @Override
@@ -411,5 +412,13 @@ public class PortableCraftingStationContainer extends Container {
                 }
             }
         }
+    }
+
+    @Override
+    public ItemStack slotClick(int slotId, int clickedButton, int mode, EntityPlayer player) {
+        if (mode == 2 && this.openerSlot == clickedButton) {
+            return null;
+        }
+        return super.slotClick(slotId, clickedButton, mode, player);
     }
 }
