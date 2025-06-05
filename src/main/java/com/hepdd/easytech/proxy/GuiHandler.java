@@ -1,10 +1,10 @@
-package com.hepdd.easytech;
+package com.hepdd.easytech.proxy;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
+import com.hepdd.easytech.EasyTechnology;
+import com.hepdd.easytech.api.objects.PortableCraftingStationContainer;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -22,10 +22,9 @@ public class GuiHandler implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
         if (ID == GUI1) {
-            ItemStack itemStack = player.getHeldItem();
-            if (itemStack.getItem() instanceof ETHPortableCraftingStation station) {
-                return station.GetGUI(player, world, x, y, z);
-            }
+            CraftingStationLogic logic = new CraftingStationLogic();
+            logic.setWorldObj(world);
+            return new PortableCraftingStationContainer(player.inventory, logic, x, y, z);
         }
 
         return null;

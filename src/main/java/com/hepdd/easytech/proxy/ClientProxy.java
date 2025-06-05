@@ -1,4 +1,4 @@
-package com.hepdd.easytech;
+package com.hepdd.easytech.proxy;
 
 public class ClientProxy extends CommonProxy {
 
