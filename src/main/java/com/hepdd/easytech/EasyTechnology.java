@@ -4,10 +4,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
+import com.hepdd.easytech.common.ETHNetwork;
 import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
 import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
 import com.hepdd.easytech.loaders.preload.ETHStatics;
+import com.hepdd.easytech.proxy.CommonProxy;
+import com.hepdd.easytech.proxy.GuiHandler;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -27,7 +30,12 @@ public class EasyTechnology {
     public static final String MODID = "easytech";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
-    @SidedProxy(clientSide = "com.hepdd.easytech.ClientProxy", serverSide = "com.hepdd.easytech.CommonProxy")
+    @Mod.Instance("easytech")
+    public static EasyTechnology instance;
+
+    @SidedProxy(
+        clientSide = "com.hepdd.easytech.proxy.ClientProxy",
+        serverSide = "com.hepdd.easytech.proxy.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.EventHandler
@@ -44,6 +52,7 @@ public class EasyTechnology {
         new ETHLoaderMetaTileEntities().run();
         new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
+        ETHStatics.NW = new ETHNetwork();
     }
 
     @Mod.EventHandler
@@ -63,5 +72,6 @@ public class EasyTechnology {
         proxy.loadComplate(event);
         VoidMinerUtilityEx.generateDropMaps();
         new ETHStatics().run();
+        GuiHandler.init();
     }
 }

@@ -18,6 +18,7 @@ import gregtech.api.enums.OrePrefixes;
 import gregtech.api.util.GTModHandler;
 import gregtech.api.util.GTOreDictUnificator;
 import mods.railcraft.common.fluids.Fluids;
+import tconstruct.tools.TinkerTools;
 
 public class ETHLoaderRecipe implements Runnable {
 
@@ -104,6 +105,12 @@ public class ETHLoaderRecipe implements Runnable {
             new Object[] { "ABA", "BCB", "ABA", 'A', new ItemStack(Items.redstone, 1), 'B',
                 OrePrefixes.plate.get(Materials.Bronze), 'C', OrePrefixes.plate.get(Materials.Iron) });
 
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.ITEM_Portable_Crafting_Station.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { " A", "B ", 'A', new ItemStack(TinkerTools.craftingStationWood, 1), 'B',
+                new ItemStack(Items.stick, 1) });
     }
 
     public void registerCokeOvenRecipes() {
