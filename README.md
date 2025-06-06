@@ -11,12 +11,16 @@ GTNH私货模组
 
   可以使用原始仓室来实现自动化。
 
+  <img src=".github/p2.png" alt="大型焦炉" width="300">
+
 * ### 大型土高炉
   不用再堆土高炉阵列了
 
   搭建4个土高炉所需的材料即可搭建大型土高炉，提供4并行，加高建筑以提高并行数，最高16并行。
 
   可以使用原始仓室来实现自动化。
+  
+  <img src=".github/p1.png" alt="大型土高炉" width="300">
 
 * ### 更便宜的虚空矿机
   参考[更便宜的虚空矿机](https://github.com/Jonodonozym/CheaperVoidMiners)，添加原始版本和蒸汽版本。~~JOJO,我不想再挖矿啦~~
