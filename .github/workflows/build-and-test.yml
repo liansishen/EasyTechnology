@@ -6,7 +6,9 @@ on:
     branches: [ master, main ]
   push:
     branches: [ master, main ]
-    paths-ignore: 'README.md'
+    paths-ignore: 
+      - 'README.md'
+      - '.github/workflows/**'
 
 jobs:
   build-and-test:
