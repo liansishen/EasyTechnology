@@ -50,6 +50,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
     private Chunk easyTechnology$workChunk;
     @Unique
     private World easyTechnology$workDim;
+    @Unique
+    private ItemStack easyTechnology$workLocationCard;
 
     @Inject(method = "workingAtBottom", at = @At("HEAD"), cancellable = true)
     private void onWorkAtbottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe, int zPipe, int yHead,
@@ -58,13 +60,23 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         setElectricityStats();
         ItemStack is = ((MTEDrillerBase) (Object) this).getStackInSlot(1);
         if (GTUtility.isStackValid(is) && is.getItem() instanceof ETHVoidOilLocationCard) {
-            NBTTagCompound tag = is.getTagCompound();
-            if (tag != null) {
-                int dimID = tag.getInteger("dimId");
-                int posX = tag.getInteger("posX");
-                int posZ = tag.getInteger("posZ");
-                easyTechnology$workDim = DimensionManager.getWorld(dimID);
-                easyTechnology$workChunk = easyTechnology$workDim.getChunkFromChunkCoords(posX, posZ);
+            if (easyTechnology$workLocationCard == null || !ItemStack.areItemStackTagsEqual(is, easyTechnology$workLocationCard)) {
+                easyTechnology$workLocationCard = is.copy();
+                NBTTagCompound tag = is.getTagCompound();
+                if (tag != null) {
+                    int dimID = tag.getInteger("dimId");
+                    int posX = tag.getInteger("posX");
+                    int posZ = tag.getInteger("posZ");
+                    easyTechnology$workDim = DimensionManager.getWorld(dimID);
+                    easyTechnology$workChunk = easyTechnology$workDim.getChunkFromChunkCoords(posX, posZ);
+                    mOil = null;
+                }
+            }
+        } else {
+            if (easyTechnology$workLocationCard != null) {
+                easyTechnology$workLocationCard = null;
+                easyTechnology$workDim = null;
+                mOil = null;
             }
         }
         if (easyTechnology$workDim == null) {
