@@ -2,9 +2,9 @@ package com.hepdd.easytech.api.metatileentity.implementations;
 
 import static com.hepdd.easytech.loaders.preload.ETHStatics.AuthorEasyTechForItem;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
@@ -33,6 +33,9 @@ public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
             1);
     }
 
+    private int texturePage = 0;
+    private int textureIndex = 0;
+
     public ETHPrimitiveHatchOutput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
         super(aName, aTier, aDescription, aTextures);
     }
@@ -58,18 +61,12 @@ public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {}
 
     @Override
-    public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ) {}
-
-    @Override
     public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing,
         int colorIndex, boolean aActive, boolean redstoneLevel) {
-        int texturePointer = getUpdateData(); // just to be sure, from my testing the 8th bit cannot be
-        // set clientside
-        int textureIndex = texturePointer | (getmTexturePage() << 7); // Shift seven since one page is 128 textures!
 
         ITexture background;
-        if (textureIndex > 0) {
-            background = Textures.BlockIcons.casingTexturePages[getmTexturePage()][texturePointer];
+        if (texturePage > 0 || textureIndex > 0) {
+            background = Textures.BlockIcons.casingTexturePages[texturePage][textureIndex];
         } else {
             background = TextureFactory.of(Blocks.stonebrick);
         }
@@ -118,5 +115,28 @@ public class ETHPrimitiveHatchOutput extends MTEHatchOutput {
                 new TextWidget().setStringSupplier(() -> numberFormat.format(mFluid != null ? mFluid.amount : 0))
                     .setDefaultColor(COLOR_TEXT_WHITE.get())
                     .setPos(10, 30));
+    }
+
+    @Override
+    public void loadNBTData(NBTTagCompound aNBT) {
+        super.loadNBTData(aNBT);
+        texturePage = aNBT.getInteger("texturePage");
+        textureIndex = aNBT.getInteger("textureIndex");
+
+        myupdateTexture(texturePage << 7 | textureIndex);
+    }
+
+    @Override
+    public void onDescriptionPacket(NBTTagCompound data) {
+        super.onDescriptionPacket(data);
+        texturePage = data.getInteger("texturePage");
+        textureIndex = data.getInteger("textureIndex");
+    }
+
+    public final void myupdateTexture(int id) {
+        texturePage = id >> 7;
+        textureIndex = id & 127;
+
+        updateTexture(id);
     }
 }
