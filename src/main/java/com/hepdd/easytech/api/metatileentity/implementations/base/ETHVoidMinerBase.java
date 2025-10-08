@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -330,11 +329,6 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     }
 
     @Override
-    public boolean explodesOnComponentBreak(ItemStack aStack) {
-        return false;
-    }
-
-    @Override
     public ChunkCoordIntPair getActiveChunk() {
         return mCurrentChunk;
     }
@@ -347,11 +341,11 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
     @Override
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
         if (mMachine) return -1;
-        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 1, 6, 0, elementBudget, env, false, true);
+        return survivalBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 1, 6, 0, elementBudget, env, false, true);
     }
 
     @Override
-    protected boolean showRecipeTextInGUI() {
+    public boolean showRecipeTextInGUI() {
         return false;
     }
 
@@ -562,12 +556,6 @@ public abstract class ETHVoidMinerBase extends MTEEnhancedMultiBlockBase<ETHVoid
 
     protected List<IHatchElement<? super ETHVoidMinerBase>> getAllowedHatches() {
         return ImmutableList.of(InputBus, OutputBus, Maintenance, Energy);
-    }
-
-    @Override
-    public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ) {
-        this.mBlacklist = !this.mBlacklist;
-        GTUtility.sendChatToPlayer(aPlayer, "Mode: " + (this.mBlacklist ? "Blacklist" : "Whitelist"));
     }
 
     @Override
