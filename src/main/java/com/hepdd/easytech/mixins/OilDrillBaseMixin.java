@@ -60,7 +60,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         setElectricityStats();
         ItemStack is = ((MTEDrillerBase) (Object) this).getStackInSlot(1);
         if (GTUtility.isStackValid(is) && is.getItem() instanceof ETHVoidOilLocationCard) {
-            if (easyTechnology$workLocationCard == null || !ItemStack.areItemStackTagsEqual(is, easyTechnology$workLocationCard)) {
+            if (easyTechnology$workLocationCard == null
+                || !ItemStack.areItemStackTagsEqual(is, easyTechnology$workLocationCard)) {
                 easyTechnology$workLocationCard = is.copy();
                 NBTTagCompound tag = is.getTagCompound();
                 if (tag != null) {
