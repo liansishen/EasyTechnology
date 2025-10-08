@@ -6,6 +6,9 @@ on:
     branches: [ master, main ]
   push:
     branches: [ master, main ]
+    paths-ignore: 
+      - 'README.md'
+      - '.github/**'
 
 jobs:
   build-and-test:

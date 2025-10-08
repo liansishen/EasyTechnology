@@ -10,3 +10,6 @@ gt.blockmachines.multimachine.lvvoidminer.name=低压虚空矿机
 gt.blockmachines.multimachine.hvvoidminer.name=高压虚空矿机
 gt.blockmachines.multimachine.ivvoidminer.name=强导压虚空矿机
 gt.item.voidoillocationcard.name=虚拟油田定位卡
+gt.item.portablecraftingstation.name=便携合成站
+itemGroup.easytech=Easy Technology
+easytech.key.open_crafting_station=打开便携合成站

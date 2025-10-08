@@ -1,4 +1,4 @@
-package com.hepdd.easytech;
+package com.hepdd.easytech.proxy;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
@@ -11,7 +11,7 @@ public class CommonProxy {
     // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
     // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
-        Config.synchronizeConfiguration(event.getSuggestedConfigurationFile());
+        // Config.synchronizeConfiguration(event.getSuggestedConfigurationFile());
 
         // EasyTechnology.LOG.info(Config.greeting);
         // EasyTechnology.LOG.info("I am EasyTechnology at version " + Tags.VERSION);

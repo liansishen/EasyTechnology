@@ -8,12 +8,15 @@ import java.util.Map;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 
+import com.hepdd.easytech.common.ETHNetwork;
+
 import bartworks.common.configs.Configuration;
 import galacticgreg.api.ModContainer;
 import galacticgreg.api.ModDimensionDef;
 
 public class ETHStatics implements Runnable {
 
+    public static ETHNetwork NW;
     public static Map<String, String> DimMap;
     public static final String AuthorEasyTech = "Author: " + EnumChatFormatting.BLUE
         + EnumChatFormatting.BOLD
