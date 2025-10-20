@@ -104,13 +104,29 @@ Adds several machines and items to GTNH to make the early game easier.
   你还可以绑定快捷键,只要背包里有便携合成站,按下快捷键就能打开合成站界面.  
   You can bind a hotkey, and as long as you have the portable crafting station in your inventory, pressing the hotkey will open the crafting UI.
 
-## TODO List  
+## TODO List
+
+* [ ] 重置大型焦炉和大型土高炉，移除仓室改为主方块GUI
+  Redesign the Large Coke Oven and Large Primitive Blast Furnace — remove hatches and switch to a single-block GUI.
+
+* [ ] 移除原始仓室
+  Remove Primitive Hatch.
+      
+* [ ] 重置虚空矿机，过低的产量不如手挖。另GTNH 2.9.0将会修改矿物生成。
+  Rework the Void Miner — current yields are lower than hand mining. Note: GTNH 2.9.0 will change ore generation.
 
 * [ ] 完善Tooltips  
   Improve tooltips
 
-* [X] 便携合成站  
+* [X] 便携合成站
   Portable crafting station
 
-* [ ] 蒸汽油气矿机  
-  Steam oil miner
+* [ ] 砖窑，一步制作各种砖块
+  Brick Kiln — one-step crafting for all brick variants.
+
+* [ ] 原始蒸馏室，低效率产润滑油用于蒸汽矿处
+  Primitive Distillation Chamber — low-efficiency lubricant production for use in steam ore processing.
+
+* [ ] 蒸汽矿处，低效率一步处理各种矿物
+  Steam Ore Processor — low-efficiency, one-step processing for various ores.
+
