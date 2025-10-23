@@ -25,6 +25,7 @@ public enum ETHItemList {
 
     ITEM_Void_Oil_Location_Card,
     ITEM_Portable_Crafting_Station,
+    ITEM_Platform_Builder,
 
     ;
 

@@ -20,7 +20,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 import com.hepdd.easytech.api.objects.GTChunkManagerEx;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
+import com.hepdd.easytech.common.items.ETHVoidOilLocationCard;
 
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;

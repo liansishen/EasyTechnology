@@ -1,4 +1,4 @@
-package com.hepdd.easytech.common.tileentities.machines.basic;
+package com.hepdd.easytech.common.items;
 
 import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
 

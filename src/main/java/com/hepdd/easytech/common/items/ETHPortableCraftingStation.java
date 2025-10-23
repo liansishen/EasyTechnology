@@ -1,4 +1,4 @@
-package com.hepdd.easytech.common.tileentities.machines.basic;
+package com.hepdd.easytech.common.items;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

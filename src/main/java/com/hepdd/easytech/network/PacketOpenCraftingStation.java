@@ -9,7 +9,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.world.IBlockAccess;
 
 import com.google.common.io.ByteArrayDataInput;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
+import com.hepdd.easytech.common.items.ETHPortableCraftingStation;
 
 import gregtech.api.net.GTPacket;
 import io.netty.buffer.ByteBuf;

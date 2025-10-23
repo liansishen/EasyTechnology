@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.hepdd.easytech.api.objects.GTChunkManagerEx;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
+import com.hepdd.easytech.common.items.ETHVoidOilLocationCard;
 
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;

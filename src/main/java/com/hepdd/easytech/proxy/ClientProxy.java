@@ -1,5 +1,8 @@
 package com.hepdd.easytech.proxy;
 
+import net.minecraftforge.common.MinecraftForge;
+
+import com.hepdd.easytech.common.items.ETHPlatformBuilder;
 import com.hepdd.easytech.loaders.preload.ETHLoaderKeybind;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -13,6 +16,7 @@ public class ClientProxy extends CommonProxy {
     public void init(FMLInitializationEvent event) {
 
         new ETHLoaderKeybind().run();
+        MinecraftForge.EVENT_BUS.register(new ETHPlatformBuilder.EventHandler());
         super.init(event);
     }
 }

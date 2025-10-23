@@ -1,8 +1,9 @@
 package com.hepdd.easytech.loaders.preload;
 
 import com.hepdd.easytech.api.enums.ETHItemList;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
-import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
+import com.hepdd.easytech.common.items.ETHPlatformBuilder;
+import com.hepdd.easytech.common.items.ETHPortableCraftingStation;
+import com.hepdd.easytech.common.items.ETHVoidOilLocationCard;
 
 public class ETHLoaderItem implements Runnable {
 
@@ -20,5 +21,8 @@ public class ETHLoaderItem implements Runnable {
                 "item.portablecraftingstation",
                 "Portable Crafting Station",
                 "可以方便的修武器和工具。"));
+
+        ETHItemList.ITEM_Platform_Builder
+            .set(new ETHPlatformBuilder("item.platformbuilder", "Platform Builder", "useful tool"));
     }
 }
