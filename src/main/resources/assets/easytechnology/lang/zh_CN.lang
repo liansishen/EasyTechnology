@@ -1,9 +1,3 @@
-gt.blockmachines.hatch.input.tier.primitive.name=原始输入仓
-gt.blockmachines.hatch.output.tier.primitive.name=原始输出仓
-gt.blockmachines.hatch.input_bus.tier.primitive.name=原始输入总线
-gt.blockmachines.hatch.output_bus.tier.primitive.name=原始输出总线
-gt.blockmachines.multimachine.largebrickedblastfurnace.name=大型砖高炉
-gt.blockmachines.multimachine.largecokeoven.name=大型焦炉
 gt.item.voidoillocationcard.name=虚拟油田定位卡
 gt.item.portablecraftingstation.name=便携合成站
 itemGroup.easytech=Easy Technology

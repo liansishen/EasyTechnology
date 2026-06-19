@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.hepdd.easytech.common.ETHNetwork;
 import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
-import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
 import com.hepdd.easytech.loaders.preload.ETHLoaderRecipe;
 import com.hepdd.easytech.loaders.preload.ETHStatics;
 import com.hepdd.easytech.proxy.CommonProxy;
@@ -48,7 +47,6 @@ public class EasyTechnology {
     // load "Do your mod setup. Build whatever data structures you care about. Register recipes." (Remove if not needed)
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
-        new ETHLoaderMetaTileEntities().run();
         new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
         ETHStatics.NW = new ETHNetwork();
