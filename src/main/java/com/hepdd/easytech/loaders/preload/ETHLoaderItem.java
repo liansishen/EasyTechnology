@@ -13,7 +13,7 @@ public class ETHLoaderItem implements Runnable {
 
     private void registerItem() {
         ETHItemList.ITEM_Void_Oil_Location_Card
-            .set(new ETHVoidOilLocationCard("item.voidoillocationcard", "Void Oil Location Card", "test"));
+            .set(new ETHVoidOilLocationCard("item.voidoillocationcard", "Void Oil Location Card", ""));
 
         ETHItemList.ITEM_Portable_Crafting_Station.set(
             new ETHPortableCraftingStation(

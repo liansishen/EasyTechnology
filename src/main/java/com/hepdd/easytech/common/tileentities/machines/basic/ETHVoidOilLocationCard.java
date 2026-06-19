@@ -8,9 +8,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 import gregtech.api.items.GTGenericItem;
@@ -37,28 +39,81 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
         tag.setInteger("dimId", dimId);
         tag.setInteger("posX", chunk.xPosition);
         tag.setInteger("posZ", chunk.zPosition);
-        tag.setString("dimName", world.provider.getDimensionName());
+        String dimName = getDimensionName(dimId, world);
+        tag.setString("dimName", dimName);
         FluidStack fs = undergroundOilReadInformation(chunk);
         if (fs != null) {
-            tag.setString("fluid", fs.getLocalizedName());
+            String fluidName = getFluidName(fs);
+            tag.setString("fluid", fluidName);
             tag.setInteger("fluidAmount", fs.amount);
+            GTUtility.sendChatToPlayer(
+                player,
+                StatCollector.translateToLocalFormatted(
+                    "easytech.message.void_oil_card.recorded",
+                    dimName,
+                    dimId,
+                    chunk.xPosition,
+                    chunk.zPosition,
+                    fluidName,
+                    fs.amount));
         } else {
-            tag.setString("fluid", "无地下流体");
+            tag.setString("fluid", StatCollector.translateToLocal("easytech.tooltip.void_oil_card.no_fluid"));
+            GTUtility.sendChatToPlayer(
+                player,
+                StatCollector.translateToLocalFormatted(
+                    "easytech.message.void_oil_card.recorded_empty",
+                    dimName,
+                    dimId,
+                    chunk.xPosition,
+                    chunk.zPosition));
         }
         itemStackIn.setTagCompound(tag);
-        GTUtility.sendChatToPlayer(player, "dim:" + dimId + "x:" + chunk.xPosition + "z:" + chunk.zPosition);
         return itemStackIn;
     }
 
     @Override
     protected void addAdditionalToolTips(List<String> aList, ItemStack aStack, EntityPlayer aPlayer) {
         super.addAdditionalToolTips(aList, aStack, aPlayer);
+        aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.usage"));
+        aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.purpose"));
+        aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.machine"));
         NBTTagCompound tag = aStack.getTagCompound();
-        if (tag != null) {
-            int dimId = tag.getInteger("dimId");
-            aList.add("目标维度：" + tag.getString("dimName"));
-            aList.add("区块坐标：" + tag.getInteger("posX") + "," + tag.getInteger("posZ"));
-            aList.add("流体：" + tag.getString("fluid") + "(" + tag.getInteger("fluidAmount") + ")");
+        if (tag == null) {
+            aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.empty"));
+            return;
         }
+        aList.add(
+            StatCollector.translateToLocalFormatted(
+                "easytech.tooltip.void_oil_card.dimension",
+                tag.getString("dimName"),
+                tag.getInteger("dimId")));
+        aList.add(
+            StatCollector.translateToLocalFormatted(
+                "easytech.tooltip.void_oil_card.chunk",
+                tag.getInteger("posX"),
+                tag.getInteger("posZ")));
+        aList.add(StatCollector.translateToLocalFormatted("easytech.tooltip.void_oil_card.fluid", tag.getString("fluid")));
+        aList.add(
+            StatCollector.translateToLocalFormatted(
+                "easytech.tooltip.void_oil_card.amount",
+                tag.hasKey("fluidAmount") ? tag.getInteger("fluidAmount") : StatCollector.translateToLocal("easytech.tooltip.unknown")));
+    }
+
+    private static String getFluidName(FluidStack fluidStack) {
+        String registryName = FluidRegistry.getFluidName(fluidStack);
+        if (registryName != null) {
+            String translated = StatCollector.translateToLocal("fluid." + registryName);
+            if (!translated.equals("fluid." + registryName)) return translated;
+        }
+        return fluidStack.getLocalizedName();
+    }
+
+    private static String getDimensionName(int dimId, World world) {
+        return switch (dimId) {
+            case -1 -> StatCollector.translateToLocal("easytech.dimension.nether");
+            case 0 -> StatCollector.translateToLocal("easytech.dimension.overworld");
+            case 1 -> StatCollector.translateToLocal("easytech.dimension.the_end");
+            default -> world.provider.getDimensionName();
+        };
     }
 }
