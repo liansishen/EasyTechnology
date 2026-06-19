@@ -38,7 +38,7 @@ public abstract class DrillerBaseMixin {
         int zPipe, int yHead, int oldYHead);
 
     @Shadow
-    protected int workState;
+    protected abstract void setWorkState(int state);
 
     @Shadow
     protected abstract void setRuntimeFailureReason(@NotNull CheckRecipeResult newFailureReason);
@@ -60,7 +60,7 @@ public abstract class DrillerBaseMixin {
             cir.setReturnValue(SimpleCheckRecipeResult.ofFailure("not_enough_energy"));
             cir.cancel();
         }
-        this.workState = 1;
+        this.setWorkState(1);
         boolean wasSuccessful = workingAtBottom(null, xDrill, yDrill, zDrill, 0, 0, 0, 0);
         if (this.runtimeFailure == null) {
             if (wasSuccessful) {

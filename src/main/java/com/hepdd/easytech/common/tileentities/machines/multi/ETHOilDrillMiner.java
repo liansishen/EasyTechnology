@@ -76,7 +76,7 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        return createTooltip("I");
+        return super.createTooltip();
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
             }
         }
         GTChunkManagerEx.releaseTicket((TileEntity) getBaseMetaTileEntity());
-        workState = STATE_UPWARD;
+        setWorkState(2);
         setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
         return true;
     }

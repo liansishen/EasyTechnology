@@ -83,7 +83,7 @@ public class ETHLargeCokeOven extends ETHNonConsumMultiBase<ETHLargeCokeOven> im
                     'a',
                     buildHatchAdder(ETHLargeCokeOven.class).atLeast(OutputHatch, InputBus, OutputBus)
                         .casingIndex(MACHINE_CASING_COKEOVEN_INACTIVE.ID)
-                        .dot(1)
+                        .hint(1)
                         .buildAndChain(COKE_OVEN.getBlock(), 7))
                 .addElement('s', ofBlock(Blocks.stonebrick, 0))
                 .build();

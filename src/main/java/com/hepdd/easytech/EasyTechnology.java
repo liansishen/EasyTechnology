@@ -3,7 +3,6 @@ package com.hepdd.easytech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.hepdd.easytech.api.objects.VoidMinerUtilityEx;
 import com.hepdd.easytech.common.ETHNetwork;
 import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
@@ -70,7 +69,6 @@ public class EasyTechnology {
     @Mod.EventHandler
     public void loadComplated(FMLLoadCompleteEvent event) {
         proxy.loadComplate(event);
-        VoidMinerUtilityEx.generateDropMaps();
         new ETHStatics().run();
         GuiHandler.init();
     }

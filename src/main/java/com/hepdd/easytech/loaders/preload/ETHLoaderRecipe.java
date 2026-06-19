@@ -41,32 +41,6 @@ public class ETHLoaderRecipe implements Runnable {
             new Object[] { "AA ", "AA ", "   ", 'A', COKE_OVEN.getItem() });
 
         GTModHandler.addCraftingRecipe(
-            ETHItemList.Machine_Primitive_Void_Miner.get(1),
-            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
-                | GTModHandler.RecipeBits.BUFFERED,
-            new Object[] { "AAA", "ABA", "CCC", 'A', OrePrefixes.frameGt.get(Materials.Wood), 'B',
-                OrePrefixes.gear.get(Materials.Wood), 'C', ItemList.WoodenCasing.get(1) });
-
-        GTModHandler.addCraftingRecipe(
-            ETHItemList.Machine_Steam_Void_Miner.get(1),
-            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
-                | GTModHandler.RecipeBits.BUFFERED,
-            new Object[] { "AAA", "ABA", "CCC", 'A', OrePrefixes.frameGt.get(Materials.Bronze), 'B',
-                OrePrefixes.gear.get(Materials.Bronze), 'C', ItemList.Casing_BronzePlatedBricks.get(1) });
-
-        GTModHandler.addShapelessCraftingRecipe(
-            ETHItemList.Machine_LV_Void_Miner.get(1),
-            new Object[] { ItemList.Machine_LV_Miner.get(1) });
-
-        GTModHandler.addShapelessCraftingRecipe(
-            ETHItemList.Machine_HV_Void_Miner.get(1),
-            new Object[] { ItemList.Machine_HV_Miner.get(1) });
-
-        GTModHandler.addShapelessCraftingRecipe(
-            ETHItemList.Machine_IV_Void_Miner.get(1),
-            new Object[] { ItemList.OreDrill1.get(1) });
-
-        GTModHandler.addCraftingRecipe(
             ETHItemList.Hatch_Input_Bus_Primitive.get(1),
             GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
                 | GTModHandler.RecipeBits.BUFFERED,

@@ -112,7 +112,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
             }
         }
         GTChunkManagerEx.releaseTicket((TileEntity) gregTechTile);
-        workState = 2;
+        setWorkState(2);
         this.setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
         cir.setReturnValue(true);
     }

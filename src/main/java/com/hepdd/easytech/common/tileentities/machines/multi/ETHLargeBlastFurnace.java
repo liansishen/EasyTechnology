@@ -95,7 +95,7 @@ public class ETHLargeBlastFurnace extends ETHNonConsumMultiBase<ETHLargeBlastFur
                     'a',
                     buildHatchAdder(ETHLargeBlastFurnace.class).atLeast(InputBus, OutputBus)
                         .casingIndex(MACHINE_CASING_PRIMITIVE_BLASE_FURNACE.ID)
-                        .dot(1)
+                        .hint(1)
                         .buildAndChain(GregTechAPI.sBlockCasings4, 15))
                 .addElement('s', ofBlock(Blocks.stonebrick, 0))
                 .build();
