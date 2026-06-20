@@ -1,6 +1,7 @@
 package com.hepdd.easytech.loaders.preload;
 
 import com.hepdd.easytech.api.enums.ETHItemList;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHEntangledCard;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
@@ -14,6 +15,8 @@ public class ETHLoaderItem implements Runnable {
     private void registerItem() {
         ETHItemList.ITEM_Void_Oil_Location_Card
             .set(new ETHVoidOilLocationCard("item.voidoillocationcard", "Void Oil Location Card", ""));
+
+        ETHItemList.ITEM_Entangled_Card.set(new ETHEntangledCard("item.entangledcard", "Entangled Card", ""));
 
         ETHItemList.ITEM_Portable_Crafting_Station.set(
             new ETHPortableCraftingStation(

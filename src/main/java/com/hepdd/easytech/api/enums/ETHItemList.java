@@ -11,7 +11,9 @@ import gregtech.api.util.GTUtility;
 public enum ETHItemList {
 
     ITEM_Void_Oil_Location_Card,
+    ITEM_Entangled_Card,
     ITEM_Portable_Crafting_Station,
+    Machine_Primitive_Entangled_Miner,
 
     ;
 
