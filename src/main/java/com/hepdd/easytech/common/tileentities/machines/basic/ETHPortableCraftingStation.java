@@ -35,9 +35,8 @@ public class ETHPortableCraftingStation extends GTGenericItem {
         super.addAdditionalToolTips(aList, aStack, aPlayer);
         aList.add(StatCollector.translateToLocal("easytech.tooltip.portable_crafting_station.usage"));
         aList.add(
-            StatCollector.translateToLocalFormatted(
-                "easytech.tooltip.portable_crafting_station.key",
-                getOpenKeyName()));
+            StatCollector
+                .translateToLocalFormatted("easytech.tooltip.portable_crafting_station.key", getOpenKeyName()));
     }
 
     private String getOpenKeyName() {

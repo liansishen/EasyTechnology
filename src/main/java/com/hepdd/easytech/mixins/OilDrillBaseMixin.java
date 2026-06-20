@@ -30,11 +30,11 @@ import com.hepdd.easytech.api.objects.GTChunkManagerEx;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.ValidationResult;
 import gregtech.api.util.ValidationType;
-import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
@@ -93,7 +93,9 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         }
         if (easyTechnology$workDim == null) {
             easyTechnology$workDim = gregTechTile.getWorld();
-            easyTechnology$workChunk = new ChunkCoordIntPair(gregTechTile.getXCoord() >> 4, gregTechTile.getZCoord() >> 4);
+            easyTechnology$workChunk = new ChunkCoordIntPair(
+                gregTechTile.getXCoord() >> 4,
+                gregTechTile.getZCoord() >> 4);
         }
 
         if (easyTechnology$onTryFillChunkList()) {
@@ -142,7 +144,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
 
         if (mOilFieldChunks.isEmpty()) {
             int range = 1;
-            int xChunk = Math.floorDiv(easyTechnology$workChunk.chunkXPos, range) * range; // Java was written by idiots. For negative
+            int xChunk = Math.floorDiv(easyTechnology$workChunk.chunkXPos, range) * range; // Java was written by
+                                                                                           // idiots. For negative
             // values, / returns rounded towards zero.
             // Fucking morons.
             int zChunk = Math.floorDiv(easyTechnology$workChunk.chunkZPos, range) * range;
@@ -151,12 +154,14 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
                 for (int j = 0; j < range; j++) {
 
                     ChunkCoordIntPair chunkCoord = new ChunkCoordIntPair(xChunk + i, zChunk + j);
-                    Chunk tChunk = easyTechnology$workDim.getChunkFromChunkCoords(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+                    Chunk tChunk = easyTechnology$workDim
+                        .getChunkFromChunkCoords(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
                     tFluid = undergroundOilReadInformation(tChunk);
 
                     if (tFluid != null && tOil.isFluidEqual(tFluid) && tFluid.amount > 0) {
                         mOilFieldChunks.add(chunkCoord);
-                        activeOilFieldChunkKeys.add(easyTechnology$packChunkKey(chunkCoord.chunkXPos, chunkCoord.chunkZPos));
+                        activeOilFieldChunkKeys
+                            .add(easyTechnology$packChunkKey(chunkCoord.chunkXPos, chunkCoord.chunkZPos));
                     }
                 }
             }
@@ -213,9 +218,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
 
     @Unique
     private Chunk easyTechnology$getWorkChunk() {
-        return easyTechnology$workDim.getChunkFromChunkCoords(
-            easyTechnology$workChunk.chunkXPos,
-            easyTechnology$workChunk.chunkZPos);
+        return easyTechnology$workDim
+            .getChunkFromChunkCoords(easyTechnology$workChunk.chunkXPos, easyTechnology$workChunk.chunkZPos);
     }
 
     @Unique

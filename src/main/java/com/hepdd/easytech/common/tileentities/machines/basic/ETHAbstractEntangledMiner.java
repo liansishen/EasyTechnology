@@ -1,16 +1,12 @@
 package com.hepdd.easytech.common.tileentities.machines.basic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 
-import com.gtnewhorizons.modularui.api.drawable.FallbackableUITexture;
-import com.gtnewhorizons.modularui.api.drawable.UITexture;
-import com.gtnewhorizons.modularui.api.screen.ModularWindow;
-import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import gregtech.api.gui.modularui.GTUITextures;
-import gregtech.api.recipe.BasicUIProperties;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,60 +18,189 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.util.ForgeDirection;
 
+import com.gtnewhorizons.modularui.api.screen.ModularWindow;
+import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.hepdd.easytech.api.objects.GTChunkManagerEx;
 
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
+import gregtech.api.enums.Textures;
+import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.ITexture;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEBasicMachine;
-import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.BasicUIProperties;
+import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 import gregtech.common.misc.IDrillingLogicDelegateOwner;
 import gregtech.common.ores.OreManager;
 
-import static gregtech.api.enums.Mods.GregTech;
-
+@IMetaTileEntity.SkipGenerateDescription
 public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implements IDrillingLogicDelegateOwner {
 
-    protected static final int[] RADIUS = { 16, 16, 16, 24, 32 };
-    protected static final int[] SPEED = { 160, 160, 160, 80, 40 };
-    protected static final int[] ENERGY = { 10, 16, 32, 128, 512 };
+    protected static final int[] RADIUS = { 8, 8, 8, 16, 24 };
+    protected static final int[] SPEED = { 240, 240, 160, 80, 40 };
+    protected static final int[] ENERGY = { 2, 4, 32, 128, 512 };
 
     protected final ArrayList<ChunkPosition> oreBlockPositions = new ArrayList<>();
+    protected final int minerTier;
+    protected final int rangeTier;
     protected int mSpeed;
     protected int radiusConfig;
 
     protected ChunkCoordIntPair targetChunk;
     protected int targetDimId;
+    protected int targetX;
     protected int targetY;
+    protected int targetZ;
     protected int currentScanY = 256;
     protected String lastTargetKey = "";
     protected ChunkCoordIntPair loadedChunk;
     protected final Random miningRng = new Random();
     protected int burnTime;
 
-    protected ETHAbstractEntangledMiner(int aID, String aName, String aNameRegional, int aTier, int aInputSlots,
-        int aOutputSlots, String[] aDescription) {
-        super(aID, aName, aNameRegional, aTier, 1, aDescription, 1, aOutputSlots);
-        mSpeed = SPEED[aTier];
-        radiusConfig = RADIUS[aTier];
+    protected ETHAbstractEntangledMiner(int aID, String aName, String aNameRegional, int aTier, int aMinerTier,
+        int aRangeTier, int aInputSlots, int aOutputSlots) {
+        super(
+            aID,
+            aName,
+            aNameRegional,
+            aTier,
+            1,
+            new String[] { StatCollector.translateToLocal("easytech.tooltip.entangled_miner.require_card"),
+                StatCollector.translateToLocal("easytech.tooltip.entangled_miner.mine_ores") },
+            1,
+            aOutputSlots,
+            createMinerOverlays());
+        minerTier = aMinerTier;
+        rangeTier = aRangeTier;
+        mSpeed = SPEED[minerTier];
+        radiusConfig = RADIUS[rangeTier];
     }
 
     protected ETHAbstractEntangledMiner(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures,
-        int aInputSlots, int aOutputSlots) {
+        int aMinerTier, int aRangeTier, int aInputSlots, int aOutputSlots) {
         super(aName, aTier, 1, aDescription, aTextures, 1, aOutputSlots);
-        mSpeed = SPEED[aTier];
-        radiusConfig = RADIUS[aTier];
+        minerTier = aMinerTier;
+        rangeTier = aRangeTier;
+        mSpeed = SPEED[minerTier];
+        radiusConfig = RADIUS[rangeTier];
+    }
+
+    private static ITexture[] createMinerOverlays() {
+        return new ITexture[] {
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_SIDE_ACTIVE")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_SIDE_ACTIVE_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_SIDE")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_SIDE_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_FRONT_ACTIVE")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_FRONT_ACTIVE_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_FRONT")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_FRONT_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_TOP_ACTIVE")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_TOP_ACTIVE_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_TOP")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_TOP_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_BOTTOM_ACTIVE")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_BOTTOM_ACTIVE_GLOW"))
+                    .glow()
+                    .build()),
+            TextureFactory.of(
+                TextureFactory.of(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_BOTTOM")),
+                TextureFactory.builder()
+                    .addIcon(Textures.BlockIcons.customOptional("basicmachines/miner/OVERLAY_BOTTOM_GLOW"))
+                    .glow()
+                    .build()) };
+    }
+
+    @Override
+    public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection aSide, ForgeDirection aFacing,
+        int aColorIndex, boolean aActive, boolean aRedstone) {
+        ITexture[] textures = super.getTexture(aBaseMetaTileEntity, aSide, aFacing, aColorIndex, aActive, aRedstone);
+        ITexture baseTexture = getCustomBaseTexture(aSide, aColorIndex);
+        if (baseTexture == null || textures.length == 0) return textures;
+
+        ITexture[] replaced = Arrays.copyOf(textures, textures.length);
+        replaced[0] = baseTexture;
+        return replaced;
+    }
+
+    protected ITexture getCustomBaseTexture(ForgeDirection aSide, int aColorIndex) {
+        return null;
+    }
+
+    protected int getOreFortuneTier() {
+        return Math.max(1, mTier);
+    }
+
+    @Override
+    public String[] getDescription() {
+        String[] details = GTUtility.translateMultiline(
+            getTooltipKey(),
+            getTooltipEnergyUsage(),
+            SPEED[minerTier] / 20,
+            RADIUS[rangeTier] * 2 + 1,
+            RADIUS[rangeTier] * 2 + 1,
+            getOreFortuneTier());
+        String[] description = Arrays.copyOf(mDescriptionArray, mDescriptionArray.length + details.length + 1);
+        System.arraycopy(details, 0, description, mDescriptionArray.length, details.length);
+        description[description.length - 1] = EnumChatFormatting.GRAY + "Add by: "
+            + EnumChatFormatting.BLUE
+            + EnumChatFormatting.BOLD
+            + "Easy"
+            + EnumChatFormatting.AQUA
+            + EnumChatFormatting.BOLD
+            + "Technology";;
+        return description;
+    }
+
+    protected String getTooltipKey() {
+        return "easytech.tooltip.entangled_miner.electric";
+    }
+
+    protected Object getTooltipEnergyUsage() {
+        return ENERGY[minerTier];
+    }
+
+    protected static String formatTooltipDecimal(double value) {
+        return String.format(Locale.ROOT, "%.2f", value);
     }
 
     // ==================== IDrillingLogicDelegateOwner ====================
 
     @Override
     public int getMachineTier() {
-        return mTier;
+        return getOreFortuneTier();
     }
 
     @Override
@@ -217,12 +342,14 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             return;
         }
 
-        int requiredEU = ENERGY[mTier] * (mSpeed - mProgresstime);
+        int requiredEU = ENERGY[minerTier] * (mSpeed - mProgresstime);
         if (!hasEnoughEnergy(aBaseMetaTileEntity, requiredEU)) {
             mMaxProgresstime = 0;
             if (GTValues.debugBlockMiner) {
-                GTLog.out.println("MINER: Not enough energy yet, want " + (ENERGY[mTier] * mSpeed) + " have "
-                    + getAvailableEnergy(aBaseMetaTileEntity));
+                GTLog.out.println(
+                    "MINER: Not enough energy yet, want " + (ENERGY[minerTier] * mSpeed)
+                        + " have "
+                        + getAvailableEnergy(aBaseMetaTileEntity));
             }
             return;
         }
@@ -233,7 +360,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         }
 
         mMaxProgresstime = mSpeed;
-        consumeEnergy(aBaseMetaTileEntity, ENERGY[mTier]);
+        consumeEnergy(aBaseMetaTileEntity, ENERGY[minerTier]);
 
         if (mProgresstime == mSpeed - 1) {
             if (oreBlockPositions.isEmpty()) {
@@ -244,23 +371,24 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             if (oreBlockPositions.isEmpty()) return;
 
             ChunkPosition pos = oreBlockPositions.remove(0);
-            int worldX = targetChunk.chunkXPos * 16 + pos.chunkPosX;
+            int worldX = targetX + pos.chunkPosX;
             int worldY = pos.chunkPosY;
-            int worldZ = targetChunk.chunkZPos * 16 + pos.chunkPosZ;
+            int worldZ = targetZ + pos.chunkPosZ;
 
             World world = loadTargetChunk(worldX, worldZ);
             if (world != null) {
                 Block block = world.getBlock(worldX, worldY, worldZ);
                 int meta = world.getBlockMetadata(worldX, worldY, worldZ);
                 if (GTUtility.isOre(block, meta)) {
-                    List<ItemStack> drops = OreManager.mineBlock(
-                        miningRng, world, worldX, worldY, worldZ, false, mTier, true, true);
+                    List<ItemStack> drops = OreManager
+                        .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), true, true);
                     if (drops != null) {
                         for (ItemStack drop : drops) {
                             pushOutputs(drop.copy(), drop.stackSize, true, false);
                         }
                     }
-                    OreManager.mineBlock(miningRng, world, worldX, worldY, worldZ, false, mTier, false, true);
+                    OreManager
+                        .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), false, true);
                 }
             }
         }
@@ -273,16 +401,12 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         if (aSide != getBaseMetaTileEntity().getFrontFacing() && aSide != mMainFacing) {
             if (aPlayer.isSneaking()) {
                 if (radiusConfig >= 0) radiusConfig--;
-                if (radiusConfig < 0) radiusConfig = RADIUS[mTier];
+                if (radiusConfig < 0) radiusConfig = RADIUS[rangeTier];
             } else {
-                if (radiusConfig <= RADIUS[mTier]) radiusConfig++;
-                if (radiusConfig > RADIUS[mTier]) radiusConfig = 0;
+                if (radiusConfig <= RADIUS[rangeTier]) radiusConfig++;
+                if (radiusConfig > RADIUS[rangeTier]) radiusConfig = 0;
             }
-            GTUtility.sendChatTrans(
-                aPlayer,
-                "GT5U.machines.workareaset.s",
-                radiusConfig * 2 + 1,
-                radiusConfig * 2 + 1);
+            GTUtility.sendChatTrans(aPlayer, "GT5U.machines.workareaset.s", radiusConfig * 2 + 1, radiusConfig * 2 + 1);
             fillOreList();
         }
     }
@@ -296,8 +420,8 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         World world = DimensionManager.getWorld(targetDimId);
         if (world == null) return;
 
-        int baseX = targetChunk.chunkXPos * 16;
-        int baseZ = targetChunk.chunkZPos * 16;
+        int baseX = targetX;
+        int baseZ = targetZ;
 
         for (int dx = -radiusConfig; dx <= radiusConfig; dx++) {
             for (int dz = -radiusConfig; dz <= radiusConfig; dz++) {
@@ -320,13 +444,15 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         NBTTagCompound tag = card.getTagCompound();
         if (tag == null || !tag.hasKey("dimId")) return false;
 
-        String key = tag.getInteger("dimId") + ":" + tag.getInteger("x") + ":" + tag.getInteger("y") + ":"
-            + tag.getInteger("z");
+        String key = tag.getInteger(
+            "dimId") + ":" + tag.getInteger("x") + ":" + tag.getInteger("y") + ":" + tag.getInteger("z");
         if (!Objects.equals(key, lastTargetKey)) {
             lastTargetKey = key;
             targetDimId = tag.getInteger("dimId");
-            targetChunk = new ChunkCoordIntPair(tag.getInteger("x") >> 4, tag.getInteger("z") >> 4);
+            targetX = tag.getInteger("x");
             targetY = tag.getInteger("y");
+            targetZ = tag.getInteger("z");
+            targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
             currentScanY = targetY;
             oreBlockPositions.clear();
             releaseLoadedChunk();
@@ -342,8 +468,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         releaseLoadedChunk();
         World world = DimensionManager.getWorld(targetDimId);
         if (world != null) {
-            if (GTChunkManagerEx.requestPlayerChunkLoad(
-                (TileEntity) getBaseMetaTileEntity(), chunk, "", targetDimId)) {
+            if (GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) getBaseMetaTileEntity(), chunk, "", targetDimId)) {
                 loadedChunk = chunk;
             }
         }
@@ -359,7 +484,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        if (mTier == 1) {
+        if (minerTier == 1) {
             builder.widget(createSteamProgressBar(builder));
         }
 
@@ -368,7 +493,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         BasicUIProperties uiProperties = getUIProperties();
         addIOSlots(builder, uiProperties);
 
-        if (mTier > 2) {
+        if (minerTier > 1) {
             builder.widget(createChargerSlot(79, 62));
         }
 
@@ -381,7 +506,6 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
                 builder,
                 isSteampowered() ? GTUITextures.PICTURE_STALLED_STEAM : GTUITextures.PICTURE_STALLED_ELECTRICITY));
     }
-
 
     // ==================== Energy (abstract, implemented by subclasses) ====================
 
@@ -414,9 +538,9 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         aNBT.setInteger("radiusConfig", radiusConfig);
         if (lastTargetKey != null) aNBT.setString("ETHTargetKey", lastTargetKey);
         aNBT.setInteger("ETHTargetDim", targetDimId);
-        aNBT.setInteger("ETHTargetChunkX", targetChunk != null ? targetChunk.chunkXPos : 0);
-        aNBT.setInteger("ETHTargetChunkZ", targetChunk != null ? targetChunk.chunkZPos : 0);
+        aNBT.setInteger("ETHTargetX", targetX);
         aNBT.setInteger("ETHTargetY", targetY);
+        aNBT.setInteger("ETHTargetZ", targetZ);
         aNBT.setInteger("ETHCurrentScanY", currentScanY);
     }
 
@@ -426,12 +550,14 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         burnTime = aNBT.getInteger("ETHBurnTime");
         if (aNBT.hasKey("radiusConfig")) {
             int saved = aNBT.getInteger("radiusConfig");
-            if (saved >= 0 && saved <= RADIUS[mTier]) radiusConfig = saved;
+            if (saved >= 0 && saved <= RADIUS[rangeTier]) radiusConfig = saved;
         }
         lastTargetKey = aNBT.getString("ETHTargetKey");
         targetDimId = aNBT.getInteger("ETHTargetDim");
-        targetChunk = new ChunkCoordIntPair(aNBT.getInteger("ETHTargetChunkX"), aNBT.getInteger("ETHTargetChunkZ"));
+        targetX = aNBT.getInteger("ETHTargetX");
         targetY = aNBT.getInteger("ETHTargetY");
+        targetZ = aNBT.getInteger("ETHTargetZ");
+        targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
         currentScanY = aNBT.hasKey("ETHCurrentScanY") ? aNBT.getInteger("ETHCurrentScanY") : targetY;
     }
 }

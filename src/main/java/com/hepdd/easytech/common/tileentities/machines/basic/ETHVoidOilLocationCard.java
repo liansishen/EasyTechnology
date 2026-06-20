@@ -92,11 +92,13 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
                 "easytech.tooltip.void_oil_card.chunk",
                 tag.getInteger("posX"),
                 tag.getInteger("posZ")));
-        aList.add(StatCollector.translateToLocalFormatted("easytech.tooltip.void_oil_card.fluid", tag.getString("fluid")));
+        aList.add(
+            StatCollector.translateToLocalFormatted("easytech.tooltip.void_oil_card.fluid", tag.getString("fluid")));
         aList.add(
             StatCollector.translateToLocalFormatted(
                 "easytech.tooltip.void_oil_card.amount",
-                tag.hasKey("fluidAmount") ? tag.getInteger("fluidAmount") : StatCollector.translateToLocal("easytech.tooltip.unknown")));
+                tag.hasKey("fluidAmount") ? tag.getInteger("fluidAmount")
+                    : StatCollector.translateToLocal("easytech.tooltip.unknown")));
     }
 
     private static String getFluidName(FluidStack fluidStack) {

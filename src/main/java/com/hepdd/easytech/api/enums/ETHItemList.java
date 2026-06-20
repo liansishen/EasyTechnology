@@ -14,6 +14,10 @@ public enum ETHItemList {
     ITEM_Entangled_Card,
     ITEM_Portable_Crafting_Station,
     Machine_Primitive_Entangled_Miner,
+    Machine_Bronze_Entangled_Miner,
+    Machine_LV_Entangled_Miner,
+    Machine_MV_Entangled_Miner,
+    Machine_HV_Entangled_Miner,
 
     ;
 
