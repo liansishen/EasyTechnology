@@ -2,6 +2,7 @@ package com.hepdd.easytech.loaders.preload;
 
 import com.hepdd.easytech.api.enums.ETHItemList;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHEntangledCard;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHHealingRing;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
@@ -23,5 +24,7 @@ public class ETHLoaderItem implements Runnable {
                 "item.portablecraftingstation",
                 "Portable Crafting Station",
                 "可以方便的修武器和工具。"));
+
+        ETHItemList.ITEM_Healing_Ring.set(new ETHHealingRing("item.healingring", "Healing Ring", ""));
     }
 }

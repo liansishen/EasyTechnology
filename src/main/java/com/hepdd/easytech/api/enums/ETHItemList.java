@@ -13,6 +13,7 @@ public enum ETHItemList {
     ITEM_Void_Oil_Location_Card,
     ITEM_Entangled_Card,
     ITEM_Portable_Crafting_Station,
+    ITEM_Healing_Ring,
     Machine_Primitive_Entangled_Miner,
     Machine_Bronze_Entangled_Miner,
     Machine_LV_Entangled_Miner,

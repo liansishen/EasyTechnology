@@ -1,6 +1,7 @@
 gt.item.voidoillocationcard.name=虚拟油田定位卡
 gt.item.entangledcard.name=纠缠卡片
 gt.item.portablecraftingstation.name=便携合成站
+gt.item.healingring.name=治愈指环
 gt.blockmachines.basic.primitiveentangledminer.name=原始纠缠采矿机
 gt.blockmachines.basic.bronzeentangledminer.name=青铜纠缠采矿机
 gt.blockmachines.basic.lventangledminer.name=低压纠缠采矿机
@@ -36,3 +37,5 @@ easytech.tooltip.entangled_miner.bronze=使用螺丝刀调整工作区域\n使�
 easytech.tooltip.entangled_miner.electric=使用螺丝刀调整工作区域\n使用软锤关机\n§e%s§7 EU/t，挖掘每个方块需要§f%s§7秒，不间断\n最大工作范围：§f%sx%s\n贫瘠矿时运§f%s
 easytech.tooltip.portable_crafting_station.usage=右键打开
 easytech.tooltip.portable_crafting_station.key=快捷键：%s
+easytech.tooltip.healing_ring.usage=放在指环饰品栏中生效
+easytech.tooltip.healing_ring.effect=每2秒恢复少量饥饿值和饱和度

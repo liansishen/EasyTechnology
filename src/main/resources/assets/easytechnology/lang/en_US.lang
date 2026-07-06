@@ -1,6 +1,7 @@
 gt.item.voidoillocationcard.name=Void Oil Location Card
 gt.item.entangledcard.name=Entangled Card
 gt.item.portablecraftingstation.name=Portable Crafting Station
+gt.item.healingring.name=Healing Ring
 gt.blockmachines.basic.primitiveentangledminer.name=Primitive Entangled Miner
 gt.blockmachines.basic.bronzeentangledminer.name=Bronze Entangled Miner
 gt.blockmachines.basic.lventangledminer.name=LV Entangled Miner
@@ -36,3 +37,5 @@ easytech.tooltip.entangled_miner.bronze=Use Screwdriver to regulate work area\nU
 easytech.tooltip.entangled_miner.electric=Use Screwdriver to regulate work area\nUse Soft Mallet to disable mining\n§e%s§7 EU/t, §f%s§7 sec per block, no stuttering\nMaximum work area: §f%sx%s\nSmall ore fortune bonus of §f%s
 easytech.tooltip.portable_crafting_station.usage=Right-click to open
 easytech.tooltip.portable_crafting_station.key=Hotkey: %s
+easytech.tooltip.healing_ring.usage=Works when worn in a ring bauble slot
+easytech.tooltip.healing_ring.effect=Restores a small amount of hunger and saturation every 2 seconds

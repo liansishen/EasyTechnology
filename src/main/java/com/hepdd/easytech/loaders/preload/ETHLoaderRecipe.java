@@ -5,6 +5,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
 import com.hepdd.easytech.api.enums.ETHItemList;
+import com.rwtema.extrautils.ExtraUtils;
 
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
@@ -41,6 +42,15 @@ public class ETHLoaderRecipe implements Runnable {
                 | GTModHandler.RecipeBits.BUFFERED,
             new Object[] { "FSF", "SPS", "FSF", 'F', new ItemStack(Items.flint, 1), 'S', new ItemStack(Items.stick, 1),
                 'P', new ItemStack(Items.paper, 1) });
+
+        if (ExtraUtils.healingAxe != null) {
+            GTModHandler.addCraftingRecipe(
+                ETHItemList.ITEM_Healing_Ring.get(1),
+                GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                    | GTModHandler.RecipeBits.BUFFERED,
+                new Object[] { "AGA", "G G", " G ", 'A', new ItemStack(ExtraUtils.healingAxe, 1), 'G',
+                    new ItemStack(Items.gold_ingot, 1) });
+        }
 
         GTModHandler.addCraftingRecipe(
             ETHItemList.Machine_Primitive_Entangled_Miner.get(1),
