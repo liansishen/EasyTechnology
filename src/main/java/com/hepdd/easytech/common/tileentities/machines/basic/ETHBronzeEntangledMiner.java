@@ -16,8 +16,8 @@ import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.widget.FluidSlotWidget;
 
-import gregtech.api.enums.SteamVariant;
 import gregtech.api.enums.Textures;
+import gregtech.api.enums.TieredVariant;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.gui.modularui.GUITextureSet;
 import gregtech.api.interfaces.ITexture;
@@ -131,7 +131,7 @@ public class ETHBronzeEntangledMiner extends ETHAbstractEntangledMiner {
 
     @Override
     public GUITextureSet getGUITextureSet() {
-        return GUITextureSet.STEAM.apply(SteamVariant.BRONZE);
+        return GUITextureSet.STEAM.apply(TieredVariant.BRONZE);
     }
 
     @Override

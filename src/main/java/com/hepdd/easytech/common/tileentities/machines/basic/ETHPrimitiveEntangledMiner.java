@@ -21,8 +21,8 @@ import com.gtnewhorizons.modularui.common.widget.ProgressBar;
 import com.gtnewhorizons.modularui.common.widget.ProgressBar.Direction;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 
-import gregtech.api.enums.SteamVariant;
 import gregtech.api.enums.Textures;
+import gregtech.api.enums.TieredVariant;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.gui.modularui.GUITextureSet;
 import gregtech.api.interfaces.ITexture;
@@ -151,7 +151,7 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
 
     @Override
     public GUITextureSet getGUITextureSet() {
-        return GUITextureSet.STEAM.apply(SteamVariant.PRIMITIVE);
+        return GUITextureSet.STEAM.apply(TieredVariant.PRIMITIVE);
     }
 
     @Override

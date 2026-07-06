@@ -8,13 +8,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
+import gregtech.common.tileentities.machines.multi.MTEDrillerBase.WorkState;
 
 @Mixin(value = MTEDrillerBase.class, remap = false)
 public abstract class DrillerBaseMixin {
@@ -38,7 +38,7 @@ public abstract class DrillerBaseMixin {
         int zPipe, int yHead, int oldYHead);
 
     @Shadow
-    protected abstract void setWorkState(int state);
+    public abstract void setWorkState(WorkState state);
 
     @Shadow
     protected abstract void setRuntimeFailureReason(@NotNull CheckRecipeResult newFailureReason);
@@ -60,7 +60,7 @@ public abstract class DrillerBaseMixin {
             cir.setReturnValue(SimpleCheckRecipeResult.ofFailure("not_enough_energy"));
             cir.cancel();
         }
-        this.setWorkState(1);
+        this.setWorkState(WorkState.AT_BOTTOM);
         boolean wasSuccessful = workingAtBottom(null, xDrill, yDrill, zDrill, 0, 0, 0, 0);
         if (this.runtimeFailure == null) {
             if (wasSuccessful) {
@@ -74,17 +74,6 @@ public abstract class DrillerBaseMixin {
             runtimeFailure = null;
             cir.setReturnValue(result);
         }
-    }
-
-    @Inject(
-        method = "addUIWidgets",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/gtnewhorizons/modularui/api/screen/ModularWindow$Builder;widget(Lcom/gtnewhorizons/modularui/api/widget/Widget;)Lcom/gtnewhorizons/modularui/api/widget/IWidgetBuilder;",
-            ordinal = 0),
-        cancellable = true)
-    private void skipWidgetBlock(CallbackInfo ci) {
-        ci.cancel();
     }
 
 }

@@ -31,6 +31,7 @@ import gregtech.api.util.GTLog;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.ValidationResult;
 import gregtech.api.util.ValidationType;
+import gregtech.common.tileentities.machines.multi.MTEDrillerBase.WorkState;
 import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
 public class ETHOilDrillMiner extends MTEOilDrillBase {
@@ -135,7 +136,7 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
             }
         }
         GTChunkManagerEx.releaseTicket((TileEntity) getBaseMetaTileEntity());
-        setWorkState(2);
+        setWorkState(WorkState.UPWARD);
         setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
         return true;
     }

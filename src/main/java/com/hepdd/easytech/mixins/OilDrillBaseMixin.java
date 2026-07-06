@@ -36,6 +36,7 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.ValidationResult;
 import gregtech.api.util.ValidationType;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
+import gregtech.common.tileentities.machines.multi.MTEDrillerBase.WorkState;
 import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
 @Mixin(value = MTEOilDrillBase.class, remap = false)
@@ -124,7 +125,7 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
             }
         }
         GTChunkManagerEx.releaseTicket((TileEntity) gregTechTile);
-        setWorkState(2);
+        setWorkState(WorkState.UPWARD);
         this.setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
         cir.setReturnValue(true);
     }
