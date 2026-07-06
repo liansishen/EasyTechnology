@@ -4,6 +4,7 @@ import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
 
 import java.util.List;
 
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -20,8 +21,15 @@ import gregtech.api.util.GTUtility;
 
 public class ETHVoidOilLocationCard extends GTGenericItem {
 
+    private static final String TEXTURE = "easytechnology:void_oil_location_card";
+
     public ETHVoidOilLocationCard(String aUnlocalized, String aEnglish, String aEnglishTooltip) {
         super(aUnlocalized, aEnglish, aEnglishTooltip);
+    }
+
+    @Override
+    public void registerIcons(IIconRegister iconRegister) {
+        mIcon = iconRegister.registerIcon(TEXTURE);
     }
 
     @Override
