@@ -20,6 +20,12 @@ public class ETHEntangledCard extends GTGenericItem {
     }
 
     @Override
+    public boolean hasEffect(ItemStack stack) {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag != null && tag.hasKey("dimId") && tag.hasKey("x") && tag.hasKey("y") && tag.hasKey("z");
+    }
+
+    @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
         if (world.isRemote) return itemStack;
         int x = 0;

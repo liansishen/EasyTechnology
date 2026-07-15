@@ -29,6 +29,12 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
     }
 
     @Override
+    public boolean hasEffect(ItemStack stack) {
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag != null && tag.hasKey("dimId") && tag.hasKey("posX") && tag.hasKey("posZ");
+    }
+
+    @Override
     public void registerIcons(IIconRegister iconRegister) {
         mIcon = iconRegister.registerIcon(TEXTURE);
     }
