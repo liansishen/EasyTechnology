@@ -39,11 +39,14 @@ public class PacketOpenCraftingStation extends GTPacket {
 
     @Override
     public void setINetHandler(INetHandler aHandler) {
-        player = ((NetHandlerPlayServer) aHandler).playerEntity;
+        if (aHandler instanceof NetHandlerPlayServer serverHandler) {
+            player = serverHandler.playerEntity;
+        }
     }
 
     @Override
     public void process(IBlockAccess world) {
+        if (player == null) return;
 
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
             ItemStack is = player.inventory.getStackInSlot(i);

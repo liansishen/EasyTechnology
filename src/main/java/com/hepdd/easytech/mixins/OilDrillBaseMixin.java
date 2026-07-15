@@ -61,6 +61,8 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
     @Unique
     private World easyTechnology$workDim;
     @Unique
+    private boolean easyTechnology$usesLocationCard;
+    @Unique
     private ItemStack easyTechnology$workLocationCard;
 
     @Inject(method = "workingAtBottom", at = @At("HEAD"), cancellable = true)
@@ -72,24 +74,31 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
         if (GTUtility.isStackValid(is) && is.getItem() instanceof ETHVoidOilLocationCard) {
             if (easyTechnology$workLocationCard == null
                 || !ItemStack.areItemStackTagsEqual(is, easyTechnology$workLocationCard)) {
-                easyTechnology$workLocationCard = is.copy();
                 NBTTagCompound tag = is.getTagCompound();
-                if (tag != null) {
+                if (tag == null) {
+                    easyTechnology$clearLocationCardTarget((TileEntity) gregTechTile);
+                } else {
                     int dimID = tag.getInteger("dimId");
                     int posX = tag.getInteger("posX");
                     int posZ = tag.getInteger("posZ");
-                    easyTechnology$workDim = DimensionManager.getWorld(dimID);
-                    easyTechnology$workChunk = new ChunkCoordIntPair(posX, posZ);
-                    mOil = null;
-                    easyTechnology$clearOilFieldChunks();
+                    World targetWorld = DimensionManager.getWorld(dimID);
+                    if (targetWorld == null) {
+                        easyTechnology$clearLocationCardTarget((TileEntity) gregTechTile);
+                    } else {
+                        easyTechnology$workLocationCard = is.copy();
+                        easyTechnology$workDim = targetWorld;
+                        easyTechnology$workChunk = new ChunkCoordIntPair(posX, posZ);
+                        easyTechnology$usesLocationCard = true;
+                        GTChunkManagerEx.releaseTicket((TileEntity) gregTechTile);
+                        mWorkChunkNeedsReload = true;
+                        mOil = null;
+                        easyTechnology$clearOilFieldChunks();
+                    }
                 }
             }
         } else {
             if (easyTechnology$workLocationCard != null) {
-                easyTechnology$workLocationCard = null;
-                easyTechnology$workDim = null;
-                mOil = null;
-                easyTechnology$clearOilFieldChunks();
+                easyTechnology$clearLocationCardTarget((TileEntity) gregTechTile);
             }
         }
         if (easyTechnology$workDim == null) {
@@ -97,16 +106,21 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
             easyTechnology$workChunk = new ChunkCoordIntPair(
                 gregTechTile.getXCoord() >> 4,
                 gregTechTile.getZCoord() >> 4);
+            easyTechnology$usesLocationCard = false;
         }
 
         if (easyTechnology$onTryFillChunkList()) {
             if (mWorkChunkNeedsReload) {
                 mCurrentChunk = new ChunkCoordIntPair(xDrill >> 4, zDrill >> 4);
-                GTChunkManagerEx.requestPlayerChunkLoad(
-                    (TileEntity) gregTechTile,
-                    easyTechnology$workChunk,
-                    "",
-                    easyTechnology$workDim.provider.dimensionId);
+                if (easyTechnology$usesLocationCard) {
+                    GTChunkManagerEx.requestPlayerChunkLoad(
+                        (TileEntity) gregTechTile,
+                        easyTechnology$workChunk,
+                        "",
+                        easyTechnology$workDim.provider.dimensionId);
+                } else {
+                    GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) gregTechTile, easyTechnology$workChunk, "");
+                }
                 mWorkChunkNeedsReload = false;
             }
 
@@ -227,6 +241,18 @@ public abstract class OilDrillBaseMixin extends DrillerBaseMixin {
     private void easyTechnology$clearOilFieldChunks() {
         mOilFieldChunks.clear();
         activeOilFieldChunkKeys.clear();
+    }
+
+    @Unique
+    private void easyTechnology$clearLocationCardTarget(TileEntity gregTechTile) {
+        easyTechnology$workLocationCard = null;
+        easyTechnology$workDim = null;
+        easyTechnology$workChunk = null;
+        easyTechnology$usesLocationCard = false;
+        GTChunkManagerEx.releaseTicket(gregTechTile);
+        mWorkChunkNeedsReload = true;
+        mOil = null;
+        easyTechnology$clearOilFieldChunks();
     }
 
     @Unique

@@ -59,6 +59,7 @@ public abstract class DrillerBaseMixin {
             ((MTEDrillerBase) (Object) this).stopMachine(ShutDownReasonRegistry.NONE);
             cir.setReturnValue(SimpleCheckRecipeResult.ofFailure("not_enough_energy"));
             cir.cancel();
+            return;
         }
         this.setWorkState(WorkState.AT_BOTTOM);
         boolean wasSuccessful = workingAtBottom(null, xDrill, yDrill, zDrill, 0, 0, 0, 0);

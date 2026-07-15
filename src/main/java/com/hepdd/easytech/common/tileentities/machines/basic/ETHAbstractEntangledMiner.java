@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -32,6 +31,7 @@ import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEBasicMachine;
+import gregtech.api.objects.XSTR;
 import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLog;
@@ -60,7 +60,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     protected int currentScanY = 256;
     protected String lastTargetKey = "";
     protected ChunkCoordIntPair loadedChunk;
-    protected final Random miningRng = new Random();
+    protected final XSTR miningRng = new XSTR();
     protected int burnTime;
 
     protected ETHAbstractEntangledMiner(int aID, String aName, String aNameRegional, int aTier, int aMinerTier,
@@ -223,7 +223,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     }
 
     @Override
-    public boolean pushOutputs(ItemStack aStack, int aAmount, boolean aAlsoPushToInputs, boolean aSimulate) {
+    public boolean pushOutputs(ItemStack aStack, int aAmount, boolean aSimulate, boolean aAlsoPushToInputs) {
         if (aAlsoPushToInputs) {
             if (pushOutput(getInputSlot(), getInputSlot() + mInputSlotCount, aStack, aAmount, aSimulate)) return true;
         }
@@ -380,11 +380,21 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
                 Block block = world.getBlock(worldX, worldY, worldZ);
                 int meta = world.getBlockMetadata(worldX, worldY, worldZ);
                 if (GTUtility.isOre(block, meta)) {
+                    long seed = miningRng.getSeed();
                     List<ItemStack> drops = OreManager
                         .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), true, true);
+
+                    miningRng.setSeed(seed);
+
                     if (drops != null) {
                         for (ItemStack drop : drops) {
-                            pushOutputs(drop.copy(), drop.stackSize, true, false);
+                            if (!pushOutputs(drop, drop.stackSize, true, false)) {
+                                return;
+                            }
+                        }
+
+                        for (ItemStack drop : drops) {
+                            pushOutputs(drop, drop.stackSize, false, false);
                         }
                     }
                     OreManager

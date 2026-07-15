@@ -112,7 +112,12 @@ public class GTChunkManagerEx
         if (GTValues.debugChunkloaders && chunkXZ != null)
             GTLog.out.println("GTChunkManager: Chunk request: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
         if (instance.registeredTickets.containsKey(owner)) {
-            ForgeChunkManager.forceChunk(instance.registeredTickets.get(owner), chunkXZ);
+            ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
+            if (ticket.world != owner.getWorldObj()) {
+                releaseTicket(owner);
+                return requestPlayerChunkLoad(owner, chunkXZ, player);
+            }
+            ForgeChunkManager.forceChunk(ticket, chunkXZ);
         } else {
             ForgeChunkManager.Ticket ticket;
             if (player.isEmpty())
@@ -151,16 +156,22 @@ public class GTChunkManagerEx
         int dimId) {
         if (!GTValues.enableChunkloaders) return false;
         if (!GTValues.alwaysReloadChunkloaders && chunkXZ == null) return false;
+        World world = DimensionManager.getWorld(dimId);
+        if (world == null) return false;
         if (GTValues.debugChunkloaders && chunkXZ != null)
             GTLog.out.println("GTChunkManager: Chunk request: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
         if (instance.registeredTickets.containsKey(owner)) {
-            ForgeChunkManager.forceChunk(instance.registeredTickets.get(owner), chunkXZ);
+            ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
+            if (ticket.world != world) {
+                releaseTicket(owner);
+                return requestPlayerChunkLoad(owner, chunkXZ, player, dimId);
+            }
+            ForgeChunkManager.forceChunk(ticket, chunkXZ);
         } else {
             ForgeChunkManager.Ticket ticket;
-            if (player.isEmpty()) ticket = ForgeChunkManager
-                .requestTicket(GTMod.GT, DimensionManager.getWorld(dimId), ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager
-                .requestPlayerTicket(GTMod.GT, player, DimensionManager.getWorld(dimId), ForgeChunkManager.Type.NORMAL);
+            if (player.isEmpty())
+                ticket = ForgeChunkManager.requestTicket(GTMod.GT, world, ForgeChunkManager.Type.NORMAL);
+            else ticket = ForgeChunkManager.requestPlayerTicket(GTMod.GT, player, world, ForgeChunkManager.Type.NORMAL);
             if (ticket == null) {
                 if (GTValues.debugChunkloaders)
                     GTLog.out.println("GTChunkManager: ForgeChunkManager.requestTicket failed");
