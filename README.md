@@ -1,44 +1,58 @@
-## 关于本模组
-## About This Mod
+# EasyTechnology
 
-GTNH私货模组
-A private mod for GTNH
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-为GTNH添加一些机器、物品，使得前期更轻松一些。
-Adds several machines and items to GTNH to make the early game easier.
+EasyTechnology is a small addon for GregTech: New Horizons that adds convenience items and machines, primarily for early- and mid-game automation.
 
-## 机器、物品
-## Machines and Items
+## Features
 
-* ### 虚拟油田定位卡
-  ### Virtual Oil Field Locator Card
+### Entangled Card
 
-  在虚拟油田所在区块右键定位卡，会将维度和区块坐标以及所包含的虚拟油田的信息保存至定位卡中。
-  Right-click the locator card in a chunk with a virtual oil field to save the dimension, chunk coordinates, and oil field info.
+The Entangled Card records a dimension and block position.
 
-  在油气矿机的控制器方块物品栏中放入虚拟油田定位卡，油气矿机会直接挖取定位卡上记录的区块内包含的虚拟油田。
-  Place the locator card in the oil miner's controller slot to mine oil directly from the recorded chunk.
+- Right-click a block to record that block's coordinates.
+- Right-click the air to record the player's current coordinates.
+- Insert the recorded card into an Entangled Miner to mine ores around that remote position, including positions in another dimension.
+- A recorded card displays the enchantment glint.
 
-* ### 修改多方块矿机
-  ### Modified Multiblock Miners
+### Entangled Miners
 
-  现在采集虚拟资源(油气、虚空)的多方块矿机都不需要采矿管道了
-  Multiblock miners for virtual resources (oil, void) no longer need mining pipes
+Entangled Miners extract real ore blocks around the position stored on an Entangled Card. Their work area can be adjusted with a screwdriver, and mining can be disabled with a soft mallet.
 
-* ### 便携合成站
-  ### Portable Crafting Station
+| Miner | Power source | Maximum work area |
+| --- | --- | --- |
+| Primitive Entangled Miner | Furnace fuel | 17 x 17 |
+| Bronze Entangled Miner | Steam | 17 x 17 |
+| LV Entangled Miner | EU | 17 x 17 |
+| MV Entangled Miner | EU | 33 x 33 |
+| HV Entangled Miner | EU | 49 x 49 |
 
-  使用便携合成站,在需要修复匠魂工具时,不需要每次都把合成站放置在地上,直接使用即可。
-  With the portable crafting station, you don't need to place it on the ground to repair Tinkers' tools; just use it directly.
+The LV, MV, and HV work areas match the standard GregTech miners of the same voltage tier.
 
-  你还可以绑定快捷键,只要背包里有便携合成站,按下快捷键就能打开合成站界面.
-  You can bind a hotkey, and as long as you have the portable crafting station in your inventory, pressing the hotkey will open the crafting UI.
+### Void Oil Location Card
 
-## TODO List
+Right-click the air while standing in a target chunk to record its dimension, chunk coordinates, underground fluid type, and remaining virtual oil amount.
 
-* [ ] 完善Tooltips
-  Improve tooltips
+Place the recorded card in an Oil Drilling Rig controller slot to make the rig extract oil from that chunk, including a chunk in another dimension. A recorded card displays the enchantment glint.
 
-* [X] 便携合成站
-  Portable crafting station
+### Portable Crafting Station
 
+The Portable Crafting Station opens a Tinkers' Construct crafting station without placing a block.
+
+- Right-click the item to open its interface.
+- A configurable hotkey can open it while it is anywhere in the player's inventory.
+- It can be used for normal crafting and Tinkers' Construct tool repair or modification.
+
+### Healing Ring
+
+The Healing Ring is worn in a Baubles ring slot. While equipped, it restores a small amount of hunger and saturation every two seconds.
+
+The recipe is available when Extra Utilities is installed because it uses the Healing Axe as an ingredient.
+
+### Pipe-Free Virtual Resource Drilling
+
+GregTech multiblock drilling rigs that collect virtual resources, such as underground oil and void resources, operate without mining pipes.
+
+## License
+
+See [LICENSE](LICENSE).
