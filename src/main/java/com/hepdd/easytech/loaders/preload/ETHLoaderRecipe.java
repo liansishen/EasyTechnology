@@ -7,6 +7,8 @@ import net.minecraft.item.ItemStack;
 import com.hepdd.easytech.api.enums.ETHItemList;
 import com.rwtema.extrautils.ExtraUtils;
 
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.OrePrefixes;
@@ -43,14 +45,7 @@ public class ETHLoaderRecipe implements Runnable {
             new Object[] { "FSF", "SPS", "FSF", 'F', new ItemStack(Items.flint, 1), 'S', new ItemStack(Items.stick, 1),
                 'P', new ItemStack(Items.paper, 1) });
 
-        if (ExtraUtils.healingAxe != null) {
-            GTModHandler.addCraftingRecipe(
-                ETHItemList.ITEM_Healing_Ring.get(1),
-                GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
-                    | GTModHandler.RecipeBits.BUFFERED,
-                new Object[] { "AGA", "G G", " G ", 'A', new ItemStack(ExtraUtils.healingAxe, 1), 'G',
-                    new ItemStack(Items.gold_ingot, 1) });
-        }
+        if (Loader.isModLoaded("ExtraUtilities")) registerExtraUtilitiesRecipes();
 
         GTModHandler.addCraftingRecipe(
             ETHItemList.Machine_Primitive_Entangled_Miner.get(1),
@@ -93,6 +88,17 @@ public class ETHLoaderRecipe implements Runnable {
                 ItemList.Sensor_HV.get(1L), 'W', OrePrefixes.cableGt04.get(Materials.Gold), 'M',
                 ItemList.Hull_HV.get(1L), 'R', ItemList.Robot_Arm_HV.get(1L), 'P', ItemList.Electric_Piston_HV.get(1L),
                 'E', ItemList.Electric_Motor_HV.get(1L) });
+    }
+
+    @Optional.Method(modid = "ExtraUtilities")
+    private void registerExtraUtilitiesRecipes() {
+        if (ExtraUtils.healingAxe == null) return;
+        GTModHandler.addCraftingRecipe(
+            ETHItemList.ITEM_Healing_Ring.get(1),
+            GTModHandler.RecipeBits.DISMANTLEABLE | GTModHandler.RecipeBits.DO_NOT_CHECK_FOR_COLLISIONS
+                | GTModHandler.RecipeBits.BUFFERED,
+            new Object[] { "AGA", "G G", " G ", 'A', new ItemStack(ExtraUtils.healingAxe, 1), 'G',
+                new ItemStack(Items.gold_ingot, 1) });
     }
 
 }

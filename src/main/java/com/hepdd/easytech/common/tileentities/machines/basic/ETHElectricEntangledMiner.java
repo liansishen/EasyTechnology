@@ -12,7 +12,7 @@ import gregtech.api.recipe.BasicUIProperties;
 public class ETHElectricEntangledMiner extends ETHAbstractEntangledMiner {
 
     public ETHElectricEntangledMiner(int aID, String aName, String aNameRegional, int aTier) {
-        super(aID, aName, aNameRegional, aTier, aTier + 1, aTier + 1, 1, 2);
+        super(aID, aName, aNameRegional, aTier, aTier + 1, aTier, 1, 2);
     }
 
     public ETHElectricEntangledMiner(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {

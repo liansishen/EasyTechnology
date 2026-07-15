@@ -3,6 +3,7 @@ package com.hepdd.easytech;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.hepdd.easytech.api.objects.GTChunkManagerEx;
 import com.hepdd.easytech.common.ETHNetwork;
 import com.hepdd.easytech.loaders.preload.ETHLoaderItem;
 import com.hepdd.easytech.loaders.preload.ETHLoaderMetaTileEntities;
@@ -18,12 +19,14 @@ import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 
 @Mod(
     modid = EasyTechnology.MODID,
     version = Tags.VERSION,
     name = "EasyTechnology",
-    acceptedMinecraftVersions = "[1.7.10]")
+    acceptedMinecraftVersions = "[1.7.10]",
+    dependencies = "required-after:gregtech;required-after:TConstruct;required-after:Baubles|Expanded;after:ExtraUtilities")
 public class EasyTechnology {
 
     public static final String MODID = "easytech";
@@ -41,6 +44,7 @@ public class EasyTechnology {
     // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
     // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
+        GTChunkManagerEx.init();
         proxy.preInit(event);
     }
 
@@ -64,6 +68,11 @@ public class EasyTechnology {
     // register server commands in this event handler (Remove if not needed)
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
+    }
+
+    @Mod.EventHandler
+    public void serverStopped(FMLServerStoppedEvent event) {
+        GTChunkManagerEx.onServerStopped();
     }
 
     @Mod.EventHandler

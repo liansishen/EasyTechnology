@@ -42,9 +42,10 @@ import gregtech.common.ores.OreManager;
 @IMetaTileEntity.SkipGenerateDescription
 public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implements IDrillingLogicDelegateOwner {
 
-    protected static final int[] RADIUS = { 8, 8, 8, 16, 24 };
+    protected static final int[] RADIUS = { 8, 8, 16, 24, 32 };
     protected static final int[] SPEED = { 240, 240, 160, 80, 40 };
     protected static final int[] ENERGY = { 2, 4, 32, 128, 512 };
+    private static final int SCAN_BLOCKS_PER_TICK = 64;
 
     protected final ArrayList<ChunkPosition> oreBlockPositions = new ArrayList<>();
     protected final int minerTier;
@@ -62,6 +63,8 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     protected ChunkCoordIntPair loadedChunk;
     protected final XSTR miningRng = new XSTR();
     protected int burnTime;
+    protected int scanIndex;
+    protected boolean scanPlaneActive;
 
     protected ETHAbstractEntangledMiner(int aID, String aName, String aNameRegional, int aTier, int aMinerTier,
         int aRangeTier, int aInputSlots, int aOutputSlots) {
@@ -283,12 +286,11 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     }
 
     public boolean hasFreeSpace() {
-        for (int i = getOutputSlot(); i < getOutputSlot() + 2; i++) {
-            if (mInventory[i] != null) {
-                return false;
-            }
+        for (int i = getOutputSlot(); i < getOutputSlot() + mOutputItems.length; i++) {
+            ItemStack stack = mInventory[i];
+            if (stack == null || stack.stackSize < stack.getMaxStackSize()) return true;
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -323,6 +325,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         if (!aBaseMetaTileEntity.isServerSide()) return;
 
         if (!updateTargetFromCard()) {
+            releaseLoadedChunk();
             mMaxProgresstime = 0;
             mProgresstime = 0;
             currentScanY = 256;
@@ -331,19 +334,43 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         }
 
         if (!aBaseMetaTileEntity.isAllowedToWork()) {
+            releaseLoadedChunk();
             mMaxProgresstime = 0;
             if (GTValues.debugBlockMiner) GTLog.out.println("MINER: Disabled");
             return;
         }
 
         if (!hasFreeSpace()) {
+            releaseLoadedChunk();
             mMaxProgresstime = 0;
             if (GTValues.debugBlockMiner) GTLog.out.println("MINER: No free space");
             return;
         }
 
+        if (oreBlockPositions.isEmpty()) {
+            if (!scanPlaneActive) {
+                if (currentScanY <= 0) {
+                    releaseLoadedChunk();
+                    aBaseMetaTileEntity.disableWorking();
+                    return;
+                }
+                currentScanY--;
+                resetScanPlane();
+                scanPlaneActive = true;
+            }
+
+            boolean scanComplete = scanOreBatch();
+            if (scanComplete) scanPlaneActive = false;
+            if (oreBlockPositions.isEmpty()) {
+                mMaxProgresstime = 0;
+                if (scanComplete) releaseLoadedChunk();
+                return;
+            }
+        }
+
         int requiredEU = ENERGY[minerTier] * (mSpeed - mProgresstime);
         if (!hasEnoughEnergy(aBaseMetaTileEntity, requiredEU)) {
+            releaseLoadedChunk();
             mMaxProgresstime = 0;
             if (GTValues.debugBlockMiner) {
                 GTLog.out.println(
@@ -354,23 +381,11 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             return;
         }
 
-        if (currentScanY <= 0 && oreBlockPositions.isEmpty()) {
-            aBaseMetaTileEntity.disableWorking();
-            return;
-        }
-
         mMaxProgresstime = mSpeed;
         consumeEnergy(aBaseMetaTileEntity, ENERGY[minerTier]);
 
         if (mProgresstime == mSpeed - 1) {
-            if (oreBlockPositions.isEmpty()) {
-                currentScanY--;
-                fillOreList();
-            }
-
-            if (oreBlockPositions.isEmpty()) return;
-
-            ChunkPosition pos = oreBlockPositions.remove(0);
+            ChunkPosition pos = oreBlockPositions.get(0);
             int worldX = targetX + pos.chunkPosX;
             int worldY = pos.chunkPosY;
             int worldZ = targetZ + pos.chunkPosZ;
@@ -384,22 +399,18 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
                     List<ItemStack> drops = OreManager
                         .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), true, true);
 
+                    ItemStack[] plannedOutputs = planOutputInsertion(drops);
                     miningRng.setSeed(seed);
-
-                    if (drops != null) {
-                        for (ItemStack drop : drops) {
-                            if (!pushOutputs(drop, drop.stackSize, true, false)) {
-                                return;
-                            }
-                        }
-
-                        for (ItemStack drop : drops) {
-                            pushOutputs(drop, drop.stackSize, false, false);
-                        }
+                    if (plannedOutputs == null) {
+                        releaseLoadedChunk();
+                        return;
                     }
+
                     OreManager
                         .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), false, true);
+                    commitOutputPlan(plannedOutputs);
                 }
+                oreBlockPositions.remove(0);
             }
         }
     }
@@ -417,33 +428,40 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
                 if (radiusConfig > RADIUS[rangeTier]) radiusConfig = 0;
             }
             GTUtility.sendChatTrans(aPlayer, "GT5U.machines.workareaset.s", radiusConfig * 2 + 1, radiusConfig * 2 + 1);
-            fillOreList();
+            oreBlockPositions.clear();
+            scanPlaneActive = false;
+            resetScanPlane();
         }
     }
 
     // ==================== Ore scanning ====================
 
-    protected void fillOreList() {
-        if (!updateTargetFromCard()) return;
+    protected boolean scanOreBatch() {
+        int sideLength = radiusConfig * 2 + 1;
+        int totalBlocks = sideLength * sideLength;
+        int scanned = 0;
 
-        oreBlockPositions.clear();
-        World world = DimensionManager.getWorld(targetDimId);
-        if (world == null) return;
+        while (scanIndex < totalBlocks && scanned < SCAN_BLOCKS_PER_TICK) {
+            int dx = scanIndex / sideLength - radiusConfig;
+            int dz = scanIndex % sideLength - radiusConfig;
+            int worldX = targetX + dx;
+            int worldZ = targetZ + dz;
+            World world = loadTargetChunk(worldX, worldZ);
+            if (world == null) return false;
 
-        int baseX = targetX;
-        int baseZ = targetZ;
-
-        for (int dx = -radiusConfig; dx <= radiusConfig; dx++) {
-            for (int dz = -radiusConfig; dz <= radiusConfig; dz++) {
-                int worldX = baseX + dx;
-                int worldZ = baseZ + dz;
-                Block block = world.getBlock(worldX, currentScanY, worldZ);
-                int meta = world.getBlockMetadata(worldX, currentScanY, worldZ);
-                if (GTUtility.isOre(block, meta)) {
-                    oreBlockPositions.add(new ChunkPosition(dx, currentScanY, dz));
-                }
+            Block block = world.getBlock(worldX, currentScanY, worldZ);
+            int meta = world.getBlockMetadata(worldX, currentScanY, worldZ);
+            if (GTUtility.isOre(block, meta)) {
+                oreBlockPositions.add(new ChunkPosition(dx, currentScanY, dz));
             }
+            scanIndex++;
+            scanned++;
         }
+        return scanIndex >= totalBlocks;
+    }
+
+    protected void resetScanPlane() {
+        scanIndex = 0;
     }
 
     // ==================== Entangled card target ====================
@@ -465,6 +483,8 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
             currentScanY = targetY;
             oreBlockPositions.clear();
+            scanPlaneActive = false;
+            resetScanPlane();
             releaseLoadedChunk();
             mMaxProgresstime = 0;
             mProgresstime = 0;
@@ -477,18 +497,55 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         if (chunk.equals(loadedChunk)) return DimensionManager.getWorld(targetDimId);
         releaseLoadedChunk();
         World world = DimensionManager.getWorld(targetDimId);
-        if (world != null) {
-            if (GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) getBaseMetaTileEntity(), chunk, "", targetDimId)) {
-                loadedChunk = chunk;
-            }
+        if (world == null) return null;
+        if (!GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) getBaseMetaTileEntity(), chunk, "", targetDimId)) {
+            return null;
         }
+        loadedChunk = chunk;
+        world.getChunkFromChunkCoords(chunk.chunkXPos, chunk.chunkZPos);
         return world;
     }
 
     protected void releaseLoadedChunk() {
-        if (loadedChunk != null && getBaseMetaTileEntity() instanceof TileEntity tileEntity) {
+        ChunkCoordIntPair oldLoadedChunk = loadedChunk;
+        loadedChunk = null;
+        if (oldLoadedChunk != null && getBaseMetaTileEntity() instanceof TileEntity tileEntity) {
             GTChunkManagerEx.releaseTicket(tileEntity);
-            loadedChunk = null;
+        }
+    }
+
+    private ItemStack[] planOutputInsertion(List<ItemStack> drops) {
+        ItemStack[] planned = new ItemStack[mOutputItems.length];
+        for (int i = 0; i < planned.length; i++) {
+            ItemStack existing = mInventory[getOutputSlot() + i];
+            planned[i] = existing == null ? null : existing.copy();
+        }
+        if (drops == null) return planned;
+
+        for (ItemStack drop : drops) {
+            if (drop == null || drop.stackSize <= 0) continue;
+            int remaining = drop.stackSize;
+            for (ItemStack existing : planned) {
+                if (existing == null || !GTUtility.areStacksEqual(existing, drop)) continue;
+                int inserted = Math.min(remaining, existing.getMaxStackSize() - existing.stackSize);
+                existing.stackSize += inserted;
+                remaining -= inserted;
+                if (remaining == 0) break;
+            }
+            for (int i = 0; i < planned.length && remaining > 0; i++) {
+                if (planned[i] != null) continue;
+                planned[i] = drop.copy();
+                planned[i].stackSize = Math.min(remaining, drop.getMaxStackSize());
+                remaining -= planned[i].stackSize;
+            }
+            if (remaining > 0) return null;
+        }
+        return planned;
+    }
+
+    private void commitOutputPlan(ItemStack[] plannedOutputs) {
+        for (int i = 0; i < plannedOutputs.length; i++) {
+            mInventory[getOutputSlot() + i] = plannedOutputs[i];
         }
     }
 
@@ -569,5 +626,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         targetZ = aNBT.getInteger("ETHTargetZ");
         targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
         currentScanY = aNBT.hasKey("ETHCurrentScanY") ? aNBT.getInteger("ETHCurrentScanY") : targetY;
+        resetScanPlane();
+        scanPlaneActive = true;
     }
 }

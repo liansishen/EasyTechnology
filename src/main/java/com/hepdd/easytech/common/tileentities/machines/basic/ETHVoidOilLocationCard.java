@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -38,8 +39,8 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
         int dimId = worldIn.provider.dimensionId;
         int posX = 0, posZ = 0;
         if (player instanceof EntityPlayerMP entityPlayerMP) {
-            posX = (int) entityPlayerMP.lastTickPosX;
-            posZ = (int) entityPlayerMP.lastTickPosZ;
+            posX = MathHelper.floor_double(entityPlayerMP.posX);
+            posZ = MathHelper.floor_double(entityPlayerMP.posZ);
         }
         World world = DimensionManager.getWorld(dimId);
         Chunk chunk = world.getChunkFromBlockCoords(posX, posZ);

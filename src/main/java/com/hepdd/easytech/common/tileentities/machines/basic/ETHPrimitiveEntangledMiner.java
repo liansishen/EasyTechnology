@@ -92,10 +92,22 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
         while (burnTime < aRequiredEU) {
             int fuelValue = TileEntityFurnace.getItemBurnTime(fuelSlot);
             if (fuelValue <= 0) return false;
+            ItemStack consumedFuel = fuelSlot.copy();
+            consumedFuel.stackSize = 1;
+            ItemStack container = consumedFuel.getItem()
+                .getContainerItem(consumedFuel);
+            boolean fuelWillBeEmpty = fuelSlot.stackSize <= 1;
+            if (container != null && !fuelWillBeEmpty && !pushOutputs(container, container.stackSize, true, false))
+                return false;
+
             fuelValue = fuelValue * BURN_SCALE_NUMERATOR / BURN_SCALE_DENOMINATOR * EU_PER_BURN_TICK;
             if (fuelValue <= 0) fuelValue = 1;
             fuelSlot.stackSize--;
-            if (fuelSlot.stackSize <= 0) fuelSlot = null;
+            if (fuelSlot.stackSize <= 0) {
+                fuelSlot = container;
+            } else if (container != null) {
+                pushOutputs(container, container.stackSize, false, false);
+            }
             burnTime += fuelValue;
             maxBurnTicks = burnTime;
         }

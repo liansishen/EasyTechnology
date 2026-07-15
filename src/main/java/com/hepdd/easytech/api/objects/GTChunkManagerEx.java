@@ -14,11 +14,9 @@ import net.minecraftforge.common.ForgeChunkManager;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.hepdd.easytech.EasyTechnology;
 
-import gregtech.GTMod;
 import gregtech.api.enums.GTValues;
-import gregtech.api.interfaces.IChunkLoader;
-import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.util.GTLog;
 
 public class GTChunkManagerEx
@@ -28,7 +26,7 @@ public class GTChunkManagerEx
     public static GTChunkManagerEx instance = new GTChunkManagerEx();
 
     public static void init() {
-        ForgeChunkManager.setForcedChunkLoadingCallback(GTMod.GT, instance);
+        ForgeChunkManager.setForcedChunkLoadingCallback(EasyTechnology.instance, instance);
     }
 
     @Override
@@ -51,32 +49,8 @@ public class GTChunkManagerEx
     @Override
     public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world,
         int maxTicketCount) {
-        List<ForgeChunkManager.Ticket> validTickets = new ArrayList<>();
-        if (GTValues.alwaysReloadChunkloaders) {
-            for (ForgeChunkManager.Ticket ticket : tickets) {
-                int x = ticket.getModData()
-                    .getInteger("OwnerX");
-                int y = ticket.getModData()
-                    .getInteger("OwnerY");
-                int z = ticket.getModData()
-                    .getInteger("OwnerZ");
-                if (y > 0) {
-                    TileEntity tile = world.getTileEntity(x, y, z);
-                    if (tile instanceof IGregTechTileEntity && ((IGregTechTileEntity) tile).isAllowedToWork()) {
-                        ForgeChunkManager.forceChunk(ticket, new ChunkCoordIntPair(x >> 4, z >> 4));
-                        if (!registeredTickets.containsKey(tile)) {
-                            registeredTickets.put(tile, ticket);
-                            if (((IGregTechTileEntity) tile).getMetaTileEntity() instanceof IChunkLoader)
-                                ForgeChunkManager.forceChunk(
-                                    ticket,
-                                    ((IChunkLoader) ((IGregTechTileEntity) tile).getMetaTileEntity()).getActiveChunk());
-                            validTickets.add(ticket);
-                        }
-                    }
-                }
-            }
-        }
-        return validTickets;
+        // Working-target tickets are transient and are reacquired when their source machine resumes.
+        return new ArrayList<>();
     }
 
     /**
@@ -120,10 +94,13 @@ public class GTChunkManagerEx
             ForgeChunkManager.forceChunk(ticket, chunkXZ);
         } else {
             ForgeChunkManager.Ticket ticket;
-            if (player.isEmpty())
-                ticket = ForgeChunkManager.requestTicket(GTMod.GT, owner.getWorldObj(), ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager
-                .requestPlayerTicket(GTMod.GT, player, owner.getWorldObj(), ForgeChunkManager.Type.NORMAL);
+            if (player.isEmpty()) ticket = ForgeChunkManager
+                .requestTicket(EasyTechnology.instance, owner.getWorldObj(), ForgeChunkManager.Type.NORMAL);
+            else ticket = ForgeChunkManager.requestPlayerTicket(
+                EasyTechnology.instance,
+                player,
+                owner.getWorldObj(),
+                ForgeChunkManager.Type.NORMAL);
             if (ticket == null) {
                 if (GTValues.debugChunkloaders)
                     GTLog.out.println("GTChunkManager: ForgeChunkManager.requestTicket failed");
@@ -140,13 +117,15 @@ public class GTChunkManagerEx
             tag.setInteger("OwnerX", owner.xCoord);
             tag.setInteger("OwnerY", owner.yCoord);
             tag.setInteger("OwnerZ", owner.zCoord);
+            tag.setInteger("ETHOwnerDim", owner.getWorldObj().provider.dimensionId);
+            tag.setInteger("ETHTargetDim", owner.getWorldObj().provider.dimensionId);
+            tag.setInteger("ETHSchema", 1);
+            tag.setString("ETHTicketType", "working_target");
             tag.setString(
                 "OwnerType",
                 owner.getClass()
                     .getSimpleName());
             ForgeChunkManager.forceChunk(ticket, chunkXZ);
-            if (GTValues.alwaysReloadChunkloaders)
-                ForgeChunkManager.forceChunk(ticket, new ChunkCoordIntPair(owner.xCoord >> 4, owner.zCoord >> 4));
             instance.registeredTickets.put(owner, ticket);
         }
         return true;
@@ -170,8 +149,9 @@ public class GTChunkManagerEx
         } else {
             ForgeChunkManager.Ticket ticket;
             if (player.isEmpty())
-                ticket = ForgeChunkManager.requestTicket(GTMod.GT, world, ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager.requestPlayerTicket(GTMod.GT, player, world, ForgeChunkManager.Type.NORMAL);
+                ticket = ForgeChunkManager.requestTicket(EasyTechnology.instance, world, ForgeChunkManager.Type.NORMAL);
+            else ticket = ForgeChunkManager
+                .requestPlayerTicket(EasyTechnology.instance, player, world, ForgeChunkManager.Type.NORMAL);
             if (ticket == null) {
                 if (GTValues.debugChunkloaders)
                     GTLog.out.println("GTChunkManager: ForgeChunkManager.requestTicket failed");
@@ -188,13 +168,15 @@ public class GTChunkManagerEx
             tag.setInteger("OwnerX", owner.xCoord);
             tag.setInteger("OwnerY", owner.yCoord);
             tag.setInteger("OwnerZ", owner.zCoord);
+            tag.setInteger("ETHOwnerDim", owner.getWorldObj().provider.dimensionId);
+            tag.setInteger("ETHTargetDim", dimId);
+            tag.setInteger("ETHSchema", 1);
+            tag.setString("ETHTicketType", "working_target");
             tag.setString(
                 "OwnerType",
                 owner.getClass()
                     .getSimpleName());
             ForgeChunkManager.forceChunk(ticket, chunkXZ);
-            if (GTValues.alwaysReloadChunkloaders)
-                ForgeChunkManager.forceChunk(ticket, new ChunkCoordIntPair(owner.xCoord >> 4, owner.zCoord >> 4));
             instance.registeredTickets.put(owner, ticket);
         }
         return true;
@@ -206,9 +188,8 @@ public class GTChunkManagerEx
     }
 
     public static void releaseChunk(TileEntity owner, ChunkCoordIntPair chunkXZ) {
-        if (!GTValues.enableChunkloaders) return;
         ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
-        if (ticket != null) {
+        if (ticket != null && chunkXZ != null) {
             if (GTValues.debugChunkloaders) GTLog.out
                 .println("GTChunkManager: Chunk release: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
             ForgeChunkManager.unforceChunk(ticket, chunkXZ);
@@ -216,8 +197,7 @@ public class GTChunkManagerEx
     }
 
     public static void releaseTicket(TileEntity owner) {
-        if (!GTValues.enableChunkloaders) return;
-        ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
+        ForgeChunkManager.Ticket ticket = instance.registeredTickets.remove(owner);
         if (ticket != null) {
             if (GTValues.debugChunkloaders) {
                 GTLog.out.println(
@@ -231,8 +211,11 @@ public class GTChunkManagerEx
                     .println("GTChunkManager: Chunk release: (" + chunk.chunkXPos + ", " + chunk.chunkZPos + ")");
             }
             ForgeChunkManager.releaseTicket(ticket);
-            instance.registeredTickets.remove(owner);
         }
+    }
+
+    public static void onServerStopped() {
+        instance.registeredTickets.clear();
     }
 
     public static void printTickets() {
