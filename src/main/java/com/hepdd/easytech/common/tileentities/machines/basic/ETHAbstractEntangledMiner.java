@@ -21,6 +21,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
+import com.hepdd.easytech.EasyTechnology;
 import com.hepdd.easytech.api.objects.GTChunkManagerEx;
 
 import gregtech.api.enums.GTValues;
@@ -34,7 +35,6 @@ import gregtech.api.metatileentity.implementations.MTEBasicMachine;
 import gregtech.api.objects.XSTR;
 import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 import gregtech.common.misc.IDrillingLogicDelegateOwner;
 import gregtech.common.ores.OreManager;
@@ -168,13 +168,15 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
 
     @Override
     public String[] getDescription() {
-        String[] details = GTUtility.translateMultiline(
-            getTooltipKey(),
-            getTooltipEnergyUsage(),
-            SPEED[minerTier] / 20,
-            RADIUS[rangeTier] * 2 + 1,
-            RADIUS[rangeTier] * 2 + 1,
-            getOreFortuneTier());
+        String[] details = StatCollector
+            .translateToLocalFormatted(
+                getTooltipKey(),
+                getTooltipEnergyUsage(),
+                SPEED[minerTier] / 20,
+                RADIUS[rangeTier] * 2 + 1,
+                RADIUS[rangeTier] * 2 + 1,
+                getOreFortuneTier())
+            .split("\\\\n");
         String[] description = Arrays.copyOf(mDescriptionArray, mDescriptionArray.length + details.length + 1);
         System.arraycopy(details, 0, description, mDescriptionArray.length, details.length);
         description[description.length - 1] = EnumChatFormatting.GRAY + "Add by: "
@@ -306,14 +308,14 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     @Override
     public String[] getInfoData() {
         return new String[] {
-            EnumChatFormatting.BLUE + GTUtility.translate("GT5U.machines.miner") + EnumChatFormatting.RESET,
+            EnumChatFormatting.BLUE + StatCollector.translateToLocal("GT5U.machines.miner") + EnumChatFormatting.RESET,
             String.format(
                 "%s: %s%d%s %s",
-                GTUtility.translate("GT5U.machines.workarea"),
+                StatCollector.translateToLocal("GT5U.machines.workarea"),
                 EnumChatFormatting.GREEN,
                 radiusConfig * 2 + 1,
                 EnumChatFormatting.RESET,
-                GTUtility.translate("GT5U.machines.blocks")),
+                StatCollector.translateToLocal("GT5U.machines.blocks")),
             getEnergyDisplayString() };
     }
 
@@ -336,14 +338,14 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         if (!aBaseMetaTileEntity.isAllowedToWork()) {
             releaseLoadedChunk();
             mMaxProgresstime = 0;
-            if (GTValues.debugBlockMiner) GTLog.out.println("MINER: Disabled");
+            if (GTValues.debugBlockMiner) EasyTechnology.LOG.debug("MINER: Disabled");
             return;
         }
 
         if (!hasFreeSpace()) {
             releaseLoadedChunk();
             mMaxProgresstime = 0;
-            if (GTValues.debugBlockMiner) GTLog.out.println("MINER: No free space");
+            if (GTValues.debugBlockMiner) EasyTechnology.LOG.debug("MINER: No free space");
             return;
         }
 
@@ -373,7 +375,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             releaseLoadedChunk();
             mMaxProgresstime = 0;
             if (GTValues.debugBlockMiner) {
-                GTLog.out.println(
+                EasyTechnology.LOG.debug(
                     "MINER: Not enough energy yet, want " + (ENERGY[minerTier] * mSpeed)
                         + " have "
                         + getAvailableEnergy(aBaseMetaTileEntity));

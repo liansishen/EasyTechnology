@@ -4,8 +4,9 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import com.hepdd.easytech.EasyTechnology;
+
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
-import gregtech.api.util.GTLog;
 import gregtech.api.util.GTUtility;
 
 public enum ETHItemList {
@@ -87,7 +88,7 @@ public enum ETHItemList {
         sanityCheck();
         // if invalid, return a replacements
         if (GTUtility.isStackInvalid(mStack)) {
-            GTLog.out.println("Object in the ItemList is null at:");
+            EasyTechnology.LOG.warn("Object in the ItemList is null at:");
         }
         return GTUtility.copyAmount(aAmount, mStack);
     }
@@ -96,7 +97,7 @@ public enum ETHItemList {
         if (mHasNotBeenSet)
             throw new IllegalAccessError("The Enum '" + name() + "' has not been set to an Item at this time!");
         if (mDeprecated && !mWarned) {
-            new Exception(this + " is now deprecated").printStackTrace(GTLog.err);
+            EasyTechnology.LOG.warn(this + " is now deprecated", new Exception());
             // warn only once
             mWarned = true;
         }

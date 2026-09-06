@@ -19,6 +19,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
+import com.hepdd.easytech.EasyTechnology;
 import com.hepdd.easytech.api.objects.GTChunkManagerEx;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
 
@@ -27,7 +28,6 @@ import gregtech.api.enums.Materials;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.util.GTLog;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.ValidationResult;
 import gregtech.api.util.ValidationType;
@@ -178,7 +178,7 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
     protected ValidationResult<FluidStack> tryPumpOil(float speed) {
         if (mOil == null) return null;
         if (debugDriller) {
-            GTLog.out.println(" pump speed = " + speed);
+            EasyTechnology.LOG.debug(" pump speed = " + speed);
         }
 
         // Even though it works fine without this check,
@@ -211,14 +211,14 @@ public class ETHOilDrillMiner extends MTEOilDrillBase {
         for (Chunk tChunk : mOilFieldChunks) {
             FluidStack pumped = undergroundOil(tChunk, simulate ? -speed : speed);
             if (debugDriller) {
-                GTLog.out.println(
+                EasyTechnology.LOG.debug(
                     " chunkX = " + tChunk.getChunkCoordIntPair().chunkXPos
                         + " chunkZ = "
                         + tChunk.getChunkCoordIntPair().chunkZPos);
                 if (pumped != null) {
-                    GTLog.out.println("     Fluid pumped = " + pumped.amount);
+                    EasyTechnology.LOG.debug("     Fluid pumped = " + pumped.amount);
                 } else {
-                    GTLog.out.println("     No fluid pumped ");
+                    EasyTechnology.LOG.debug("     No fluid pumped ");
                 }
             }
             if (pumped == null || pumped.amount < 1) {
