@@ -25,7 +25,6 @@ import tconstruct.library.weaponry.AmmoItem;
 import tconstruct.library.weaponry.ProjectileWeapon;
 import tconstruct.tools.inventory.InventoryCraftingStation;
 import tconstruct.tools.inventory.InventoryCraftingStationResult;
-import tconstruct.tools.inventory.SlotCraftingStation;
 import tconstruct.tools.logic.CraftingStationLogic;
 
 public class PortableCraftingStationContainer extends Container {
@@ -60,7 +59,7 @@ public class PortableCraftingStationContainer extends Container {
 
         // 0 - crafting slot
         this.addSlotToContainer(
-            new SlotCraftingStation(
+            new PortableCraftingStationSlot(
                 inventoryplayer.player,
                 this.craftMatrix,
                 this.craftResult,
