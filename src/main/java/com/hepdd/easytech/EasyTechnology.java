@@ -26,7 +26,7 @@ import cpw.mods.fml.common.event.FMLServerStoppedEvent;
     version = Tags.VERSION,
     name = "EasyTechnology",
     acceptedMinecraftVersions = "[1.7.10]",
-    dependencies = "required-after:gregtech;required-after:TConstruct;required-after:Baubles|Expanded;after:ExtraUtilities")
+    dependencies = "required-after:gtnhlib;required-after:gregtech;required-after:TConstruct;required-after:Baubles|Expanded;after:ExtraUtilities")
 public class EasyTechnology {
 
     public static final String MODID = "easytech";
@@ -41,17 +41,15 @@ public class EasyTechnology {
     public static CommonProxy proxy;
 
     @Mod.EventHandler
-    // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
-    // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
         GTChunkManagerEx.init();
         proxy.preInit(event);
     }
 
     @Mod.EventHandler
-    // load "Do your mod setup. Build whatever data structures you care about. Register recipes." (Remove if not needed)
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
+        GuiHandler.init();
         new ETHLoaderMetaTileEntities().run();
         new ETHLoaderItem().run();
         new ETHLoaderRecipe().run();
@@ -59,13 +57,11 @@ public class EasyTechnology {
     }
 
     @Mod.EventHandler
-    // postInit "Handle interaction with other mods, complete your setup based on this." (Remove if not needed)
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
     }
 
     @Mod.EventHandler
-    // register server commands in this event handler (Remove if not needed)
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
     }
@@ -78,7 +74,5 @@ public class EasyTechnology {
     @Mod.EventHandler
     public void loadComplated(FMLLoadCompleteEvent event) {
         proxy.loadComplate(event);
-        new ETHStatics().run();
-        GuiHandler.init();
     }
 }

@@ -1,80 +1,111 @@
 package com.hepdd.easytech.mixins;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.tileentity.TileEntity;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.hepdd.easytech.api.objects.GTChunkManagerEx;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHVoidOilLocationCard;
+
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import gregtech.api.recipe.check.CheckRecipeResult;
-import gregtech.api.recipe.check.SimpleCheckRecipeResult;
-import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase;
 import gregtech.common.tileentities.machines.multi.MTEDrillerBase.WorkState;
+import gregtech.common.tileentities.machines.multi.MTEOilDrillBase;
 
 @Mixin(value = MTEDrillerBase.class, remap = false)
-public abstract class DrillerBaseMixin {
+public abstract class DrillerBaseMixin extends MTEEnhancedMultiBlockBase<MTEDrillerBase> {
+
+    @Shadow
+    private int yDrill;
+
+    @Shadow
+    private int yHead;
+
+    @Shadow
+    protected WorkState workState;
 
     @Shadow
     protected boolean mWorkChunkNeedsReload;
-    @Shadow
-    protected ChunkCoordIntPair mCurrentChunk;
 
     @Shadow
     protected abstract void setElectricityStats();
 
-    @Shadow
-    protected abstract boolean isEnergyEnough();
+    protected DrillerBaseMixin(String aName) {
+        super(aName);
+    }
 
-    @Shadow
-    private int xDrill, yDrill, zDrill;
+    @Unique
+    private boolean easyTechnology$isVoidOilCardActive() {
+        return ((Object) this) instanceof MTEOilDrillBase
+            && ETHVoidOilLocationCard.hasValidTarget(this.getControllerSlot());
+    }
 
-    @Shadow
-    protected abstract boolean workingAtBottom(ItemStack aStack, int xDrill, int yDrill, int zDrill, int xPipe,
-        int zPipe, int yHead, int oldYHead);
-
-    @Shadow
-    public abstract void setWorkState(WorkState state);
-
-    @Shadow
-    protected abstract void setRuntimeFailureReason(@NotNull CheckRecipeResult newFailureReason);
-
-    @Shadow
-    protected abstract void setShutdownReason(@NotNull String newReason);
-
-    @Shadow
-    private CheckRecipeResult runtimeFailure;
-
-    @Shadow
-    private CheckRecipeResult lastRuntimeFailure;
-
-    @Inject(method = "checkProcessing", at = @At("HEAD"), cancellable = true)
-    public void onCheckProcessing(CallbackInfoReturnable<CheckRecipeResult> cir) {
-        this.setElectricityStats();
-        if (!this.isEnergyEnough()) {
-            ((MTEDrillerBase) (Object) this).stopMachine(ShutDownReasonRegistry.NONE);
-            cir.setReturnValue(SimpleCheckRecipeResult.ofFailure("not_enough_energy"));
-            cir.cancel();
+    @Inject(method = "requiresMiningPipes", at = @At("HEAD"), cancellable = true)
+    private void easyTechnology$onRequiresMiningPipes(CallbackInfoReturnable<Boolean> cir) {
+        if (!easyTechnology$isVoidOilCardActive()) {
             return;
         }
-        this.setWorkState(WorkState.AT_BOTTOM);
-        boolean wasSuccessful = workingAtBottom(null, xDrill, yDrill, zDrill, 0, 0, 0, 0);
-        if (this.runtimeFailure == null) {
-            if (wasSuccessful) {
-                this.lastRuntimeFailure = null;
-            }
+        // Allow retracting any legacy pipes deployed before the location card was inserted
+        if ((this.workState == WorkState.UPWARD || this.workState == WorkState.ABORT) && this.yHead < this.yDrill) {
+            return;
+        }
+        cir.setReturnValue(false);
+    }
 
-            cir.setReturnValue(SimpleCheckRecipeResult.ofSuccess("drilling"));
-        } else {
-            final CheckRecipeResult result;
-            result = lastRuntimeFailure = runtimeFailure;
-            runtimeFailure = null;
-            cir.setReturnValue(result);
+    @Inject(
+        method = "checkProcessing",
+        at = @At(
+            value = "INVOKE",
+            target = "Lgregtech/common/tileentities/machines/multi/MTEDrillerBase;requiresMiningPipes()Z"))
+    private void easyTechnology$enterBottomWhenUsingVoidCard(CallbackInfoReturnable<CheckRecipeResult> cir) {
+        if (easyTechnology$isVoidOilCardActive() && this.workState == WorkState.DOWNWARD && this.yHead == this.yDrill) {
+            this.workState = WorkState.AT_BOTTOM;
+            this.setElectricityStats();
         }
     }
 
+    @Inject(method = "onRemoval", at = @At("HEAD"))
+    private void easyTechnology$onRemoval(CallbackInfo ci) {
+        easyTechnology$releaseCustomChunkTicket();
+    }
+
+    @Inject(method = "onAbort", at = @At("HEAD"))
+    private void easyTechnology$onAbort(CallbackInfo ci) {
+        if (easyTechnology$releaseCustomChunkTicket()) {
+            this.mWorkChunkNeedsReload = true;
+        }
+    }
+
+    @Inject(method = "onPostTick", at = @At("TAIL"))
+    private void easyTechnology$onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick, CallbackInfo ci) {
+        if (aBaseMetaTileEntity != null && aBaseMetaTileEntity.isServerSide()
+            && !aBaseMetaTileEntity.isAllowedToWork()) {
+            if (GTChunkManagerEx.releaseTicket((TileEntity) aBaseMetaTileEntity)) {
+                this.mWorkChunkNeedsReload = true;
+            }
+        }
+    }
+
+    @Override
+    public void inValidate() {
+        easyTechnology$releaseCustomChunkTicket();
+        super.inValidate();
+    }
+
+    @Unique
+    protected boolean easyTechnology$releaseCustomChunkTicket() {
+        IGregTechTileEntity base = this.getBaseMetaTileEntity();
+        if (base instanceof TileEntity tileEntity) {
+            return GTChunkManagerEx.releaseTicket(tileEntity);
+        }
+        return false;
+    }
 }

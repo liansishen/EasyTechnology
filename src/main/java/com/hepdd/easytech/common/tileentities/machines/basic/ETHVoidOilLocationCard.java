@@ -9,11 +9,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -28,10 +30,17 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
         super(aUnlocalized, aEnglish, aEnglishTooltip);
     }
 
-    @Override
-    public boolean hasEffect(ItemStack stack) {
+    public static boolean hasValidTarget(ItemStack stack) {
+        if (!GTUtility.isStackValid(stack) || !(stack.getItem() instanceof ETHVoidOilLocationCard)) {
+            return false;
+        }
         NBTTagCompound tag = stack.getTagCompound();
         return tag != null && tag.hasKey("dimId") && tag.hasKey("posX") && tag.hasKey("posZ");
+    }
+
+    @Override
+    public boolean hasEffect(ItemStack stack) {
+        return hasValidTarget(stack);
     }
 
     @Override
@@ -43,41 +52,54 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
     public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
         if (player.worldObj.isRemote) return itemStackIn;
         int dimId = worldIn.provider.dimensionId;
-        int posX = 0, posZ = 0;
+        int posX = MathHelper.floor_double(player.posX);
+        int posZ = MathHelper.floor_double(player.posZ);
         if (player instanceof EntityPlayerMP entityPlayerMP) {
             posX = MathHelper.floor_double(entityPlayerMP.posX);
             posZ = MathHelper.floor_double(entityPlayerMP.posZ);
         }
         World world = DimensionManager.getWorld(dimId);
+        if (world == null) world = worldIn;
         Chunk chunk = world.getChunkFromBlockCoords(posX, posZ);
+
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger("dimId", dimId);
         tag.setInteger("posX", chunk.xPosition);
         tag.setInteger("posZ", chunk.zPosition);
-        String dimName = getDimensionName(dimId, world);
-        tag.setString("dimName", dimName);
+        if (dimId != -1 && dimId != 0 && dimId != 1 && world.provider != null) {
+            String providerName = world.provider.getDimensionName();
+            if (providerName != null && !providerName.isEmpty()) {
+                tag.setString("dimProviderName", providerName);
+            }
+        }
+
+        Object dimChatArg = ETHEntangledCard.createDimensionChatArg(dimId, world);
         FluidStack fs = undergroundOilReadInformation(chunk);
-        if (fs != null) {
-            String fluidName = getFluidName(fs);
-            tag.setString("fluid", fluidName);
+        if (fs != null && fs.getFluid() != null && fs.amount > 0) {
+            String registryName = FluidRegistry.getFluidName(fs);
+            tag.setString(
+                "fluidName",
+                registryName != null ? registryName
+                    : fs.getFluid()
+                        .getName());
             tag.setInteger("fluidAmount", fs.amount);
-            GTUtility.sendChatToPlayer(
-                player,
-                StatCollector.translateToLocalFormatted(
+            Object fluidChatArg = new ChatComponentTranslation(fs.getUnlocalizedName());
+            player.addChatMessage(
+                new ChatComponentTranslation(
                     "easytech.message.void_oil_card.recorded",
-                    dimName,
+                    dimChatArg,
                     dimId,
                     chunk.xPosition,
                     chunk.zPosition,
-                    fluidName,
+                    fluidChatArg,
                     fs.amount));
         } else {
-            tag.setString("fluid", StatCollector.translateToLocal("easytech.tooltip.void_oil_card.no_fluid"));
-            GTUtility.sendChatToPlayer(
-                player,
-                StatCollector.translateToLocalFormatted(
+            tag.setString("fluidName", "");
+            tag.setInteger("fluidAmount", 0);
+            player.addChatMessage(
+                new ChatComponentTranslation(
                     "easytech.message.void_oil_card.recorded_empty",
-                    dimName,
+                    dimChatArg,
                     dimId,
                     chunk.xPosition,
                     chunk.zPosition));
@@ -93,22 +115,22 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
         aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.purpose"));
         aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.machine"));
         NBTTagCompound tag = aStack.getTagCompound();
-        if (tag == null) {
+        if (!hasValidTarget(aStack) || tag == null) {
             aList.add(StatCollector.translateToLocal("easytech.tooltip.void_oil_card.empty"));
             return;
         }
+        int dimId = tag.getInteger("dimId");
+        String dimDisplay = ETHEntangledCard.resolveClientDimensionName(tag, dimId);
         aList.add(
-            StatCollector.translateToLocalFormatted(
-                "easytech.tooltip.void_oil_card.dimension",
-                tag.getString("dimName"),
-                tag.getInteger("dimId")));
+            StatCollector.translateToLocalFormatted("easytech.tooltip.void_oil_card.dimension", dimDisplay, dimId));
         aList.add(
             StatCollector.translateToLocalFormatted(
                 "easytech.tooltip.void_oil_card.chunk",
                 tag.getInteger("posX"),
                 tag.getInteger("posZ")));
         aList.add(
-            StatCollector.translateToLocalFormatted("easytech.tooltip.void_oil_card.fluid", tag.getString("fluid")));
+            StatCollector
+                .translateToLocalFormatted("easytech.tooltip.void_oil_card.fluid", resolveClientFluidName(tag)));
         aList.add(
             StatCollector.translateToLocalFormatted(
                 "easytech.tooltip.void_oil_card.amount",
@@ -116,21 +138,48 @@ public class ETHVoidOilLocationCard extends GTGenericItem {
                     : StatCollector.translateToLocal("easytech.tooltip.unknown")));
     }
 
-    private static String getFluidName(FluidStack fluidStack) {
-        String registryName = FluidRegistry.getFluidName(fluidStack);
-        if (registryName != null) {
-            String translated = StatCollector.translateToLocal("fluid." + registryName);
-            if (!translated.equals("fluid." + registryName)) return translated;
+    private static String resolveClientFluidName(NBTTagCompound tag) {
+        if (tag.hasKey("fluidName")) {
+            String regName = tag.getString("fluidName");
+            if (regName == null || regName.isEmpty()) {
+                return StatCollector.translateToLocal("easytech.tooltip.void_oil_card.no_fluid");
+            }
+            return localizeFluidByRegistryName(regName);
         }
-        return fluidStack.getLocalizedName();
+        // Backward compatibility for legacy cards that baked translated strings into "fluid"
+        if (tag.hasKey("fluid")) {
+            String legacyFluid = tag.getString("fluid");
+            if (!tag.hasKey("fluidAmount") || legacyFluid.isEmpty() || "No underground fluid".equals(legacyFluid)) {
+                return StatCollector.translateToLocal("easytech.tooltip.void_oil_card.no_fluid");
+            }
+            Fluid byName = FluidRegistry.getFluid(legacyFluid);
+            if (byName != null) {
+                return localizeFluid(byName);
+            }
+            return legacyFluid;
+        }
+        return StatCollector.translateToLocal("easytech.tooltip.void_oil_card.no_fluid");
     }
 
-    private static String getDimensionName(int dimId, World world) {
-        return switch (dimId) {
-            case -1 -> StatCollector.translateToLocal("easytech.dimension.nether");
-            case 0 -> StatCollector.translateToLocal("easytech.dimension.overworld");
-            case 1 -> StatCollector.translateToLocal("easytech.dimension.the_end");
-            default -> world.provider.getDimensionName();
-        };
+    private static String localizeFluidByRegistryName(String regName) {
+        Fluid fluid = FluidRegistry.getFluid(regName);
+        if (fluid != null) {
+            return localizeFluid(fluid);
+        }
+        String key = "fluid." + regName;
+        String translated = StatCollector.translateToLocal(key);
+        return !key.equals(translated) ? translated : regName;
+    }
+
+    private static String localizeFluid(Fluid fluid) {
+        String registryName = FluidRegistry.getFluidName(fluid);
+        if (registryName != null) {
+            String key = "fluid." + registryName;
+            String translated = StatCollector.translateToLocal(key);
+            if (!key.equals(translated)) {
+                return translated;
+            }
+        }
+        return fluid.getLocalizedName(new FluidStack(fluid, 1));
     }
 }

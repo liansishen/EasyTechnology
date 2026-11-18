@@ -2,10 +2,12 @@ package com.hepdd.easytech.common.tileentities.machines.basic;
 
 import static gregtech.api.enums.Mods.GregTech;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.github.bsideup.jabel.Desugar;
@@ -28,6 +30,7 @@ import gregtech.api.gui.modularui.GUITextureSet;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.objects.XSTR;
 import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.render.TextureFactory;
 
@@ -75,8 +78,8 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
     private int maxBurnTicks = 0;
 
     @Override
-    protected boolean allowPutStackValidated(IGregTechTileEntity aBaseMetaTileEntity, int aIndex,
-        net.minecraftforge.common.util.ForgeDirection aSide, ItemStack aStack) {
+    protected boolean allowPutStackValidated(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection aSide,
+        ItemStack aStack) {
         if (aIndex == getInputSlot()) return aStack != null && aStack.getItem() instanceof ETHEntangledCard;
         return false;
     }
@@ -85,20 +88,56 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
         return aStack != null && TileEntityFurnace.getItemBurnTime(aStack) > 0;
     }
 
+    private void markMachineDirty() {
+        IGregTechTileEntity base = getBaseMetaTileEntity();
+        if (base != null) {
+            base.markDirty();
+        }
+    }
+
+    @Override
+    public void onBlockDestroyed() {
+        IGregTechTileEntity base = getBaseMetaTileEntity();
+        if (base != null && base.isServerSide() && fuelSlot != null && fuelSlot.stackSize > 0) {
+            World world = base.getWorld();
+            if (world != null) {
+                EntityItem itemEntity = new EntityItem(
+                    world,
+                    base.getXCoord() + XSTR.XSTR_INSTANCE.nextFloat() * 0.8F + 0.1F,
+                    base.getYCoord() + XSTR.XSTR_INSTANCE.nextFloat() * 0.8F + 0.1F,
+                    base.getZCoord() + XSTR.XSTR_INSTANCE.nextFloat() * 0.8F + 0.1F,
+                    fuelSlot.copy());
+                itemEntity.motionX = XSTR.XSTR_INSTANCE.nextGaussian() * 0.05D;
+                itemEntity.motionY = XSTR.XSTR_INSTANCE.nextGaussian() * 0.25D;
+                itemEntity.motionZ = XSTR.XSTR_INSTANCE.nextGaussian() * 0.05D;
+                world.spawnEntityInWorld(itemEntity);
+            }
+            fuelSlot = null;
+            base.markDirty();
+        }
+        super.onBlockDestroyed();
+    }
+
     // ==================== Energy ====================
 
     @Override
     protected boolean hasEnoughEnergy(IGregTechTileEntity aBaseMetaTileEntity, int aRequiredEU) {
+        boolean consumedAny = false;
         while (burnTime < aRequiredEU) {
             int fuelValue = TileEntityFurnace.getItemBurnTime(fuelSlot);
-            if (fuelValue <= 0) return false;
+            if (fuelValue <= 0) {
+                if (consumedAny) markMachineDirty();
+                return false;
+            }
             ItemStack consumedFuel = fuelSlot.copy();
             consumedFuel.stackSize = 1;
             ItemStack container = consumedFuel.getItem()
                 .getContainerItem(consumedFuel);
             boolean fuelWillBeEmpty = fuelSlot.stackSize <= 1;
-            if (container != null && !fuelWillBeEmpty && !pushOutputs(container, container.stackSize, true, false))
+            if (container != null && !fuelWillBeEmpty && !pushOutputs(container, container.stackSize, true, false)) {
+                if (consumedAny) markMachineDirty();
                 return false;
+            }
 
             fuelValue = fuelValue * BURN_SCALE_NUMERATOR / BURN_SCALE_DENOMINATOR * EU_PER_BURN_TICK;
             if (fuelValue <= 0) fuelValue = 1;
@@ -110,6 +149,10 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
             }
             burnTime += fuelValue;
             maxBurnTicks = burnTime;
+            consumedAny = true;
+        }
+        if (consumedAny) {
+            markMachineDirty();
         }
         return true;
     }
@@ -156,6 +199,8 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
         }
         if (aNBT.hasKey("ETHFuelSlot")) {
             fuelSlot = ItemStack.loadItemStackFromNBT(aNBT.getCompoundTag("ETHFuelSlot"));
+        } else {
+            fuelSlot = null;
         }
     }
 
@@ -196,7 +241,6 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
             new SlotWidget(new FuelSlotHandler(this), 0).setPos(new Pos2d(28, 24))
                 .setSize(new Size(18, 18))
                 .setBackground(background));
-
     }
 
     // ==================== Fuel Slot Handler ====================
@@ -213,6 +257,7 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
         public void setStackInSlot(int aSlot, ItemStack aStack) {
             if (aSlot != 0) return;
             machine.fuelSlot = aStack;
+            machine.markMachineDirty();
         }
 
         @Override
@@ -228,6 +273,7 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
             if (existing == null) {
                 if (!aSimulate) {
                     machine.fuelSlot = aStack.copy();
+                    machine.markMachineDirty();
                 }
                 return null;
             }
@@ -237,6 +283,7 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
             int toAdd = Math.min(aStack.stackSize, space);
             if (!aSimulate) {
                 existing.stackSize += toAdd;
+                machine.markMachineDirty();
             }
             if (toAdd >= aStack.stackSize) return null;
             ItemStack remainder = aStack.copy();
@@ -255,6 +302,7 @@ public class ETHPrimitiveEntangledMiner extends ETHAbstractEntangledMiner {
             if (!aSimulate) {
                 existing.stackSize -= toExtract;
                 if (existing.stackSize <= 0) machine.fuelSlot = null;
+                machine.markMachineDirty();
             }
             return extracted;
         }

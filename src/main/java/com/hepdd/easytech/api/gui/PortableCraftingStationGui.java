@@ -22,12 +22,7 @@ import tconstruct.tools.logic.CraftingStationLogic;
 @Optional.Interface(iface = "codechicken.nei.api.INEIGuiHandler", modid = "NotEnoughItems")
 public class PortableCraftingStationGui extends GuiContainer implements INEIGuiHandler {
 
-    /*
-     * Slider/slots related. Taken & adapted from Tinkers Construct 1.12 under the MIT License
-     */
-    private static final ResourceLocation gui_inventory = new ResourceLocation("tinker", "textures/gui/generic.png");
     private static final ResourceLocation background = new ResourceLocation("tinker", "textures/gui/tinkertable.png");
-    private static final ResourceLocation icons = new ResourceLocation("tinker", "textures/gui/icons.png");
 
     public boolean active;
 
@@ -75,8 +70,6 @@ public class PortableCraftingStationGui extends GuiContainer implements INEIGuiH
 
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-
-        // Draw the background
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager()
             .bindTexture(background);
@@ -85,13 +78,6 @@ public class PortableCraftingStationGui extends GuiContainer implements INEIGuiH
         if (active) {
             this.drawTexturedModalRect(this.craftingLeft + 62, this.craftingTop, 0, 166, 112, 22);
         }
-
-        this.mc.getTextureManager()
-            .bindTexture(icons);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
-        this.mc.getTextureManager()
-            .bindTexture(gui_inventory);
     }
 
     @Override

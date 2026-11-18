@@ -2,10 +2,13 @@ package com.hepdd.easytech.loaders.preload;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 
 import org.lwjgl.input.Keyboard;
 
 import com.hepdd.easytech.EasyTechnology;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
 import com.hepdd.easytech.network.PacketOpenCraftingStation;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -37,10 +40,21 @@ public class ETHLoaderKeybind implements Runnable {
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent event) {
-        if (Minecraft.getMinecraft().currentScreen != null) return;
-        if (openCraftingStation.isPressed()) {
+    public void onKeyInput(InputEvent.KeyInputEvent event) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.currentScreen != null || mc.thePlayer == null || mc.theWorld == null) return;
+        if (openCraftingStation.isPressed() && hasCraftingStationInInventory(mc.thePlayer)) {
             ETHStatics.NW.sendToServer(new PacketOpenCraftingStation());
         }
+    }
+
+    private static boolean hasCraftingStationInInventory(EntityPlayer player) {
+        ItemStack[] mainInventory = player.inventory.mainInventory;
+        for (ItemStack stack : mainInventory) {
+            if (stack != null && stack.getItem() instanceof ETHPortableCraftingStation) {
+                return true;
+            }
+        }
+        return false;
     }
 }
