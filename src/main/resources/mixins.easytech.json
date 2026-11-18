@@ -5,8 +5,5 @@
   "refmap": "mixins.easytech.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "DrillerBaseMixin",
-    "OilDrillBaseMixin"
-  ]
+  "mixins": []
 }

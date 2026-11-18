@@ -6,12 +6,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 import gregtech.api.items.GTGenericItem;
-import gregtech.api.util.GTUtility;
 
 public class ETHEntangledCard extends GTGenericItem {
 
@@ -21,31 +22,22 @@ public class ETHEntangledCard extends GTGenericItem {
 
     @Override
     public boolean hasEffect(ItemStack stack) {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag != null && tag.hasKey("dimId") && tag.hasKey("x") && tag.hasKey("y") && tag.hasKey("z");
+        return hasTarget(stack);
     }
 
     @Override
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
         if (world.isRemote) return itemStack;
-        int x = 0;
-        int y = 0;
-        int z = 0;
+        int x = MathHelper.floor_double(player.posX);
+        int y = MathHelper.floor_double(player.posY);
+        int z = MathHelper.floor_double(player.posZ);
         if (player instanceof EntityPlayerMP entityPlayer) {
-            x = (int) Math.floor(entityPlayer.posX);
-            y = (int) Math.floor(entityPlayer.posY);
-            z = (int) Math.floor(entityPlayer.posZ);
+            x = MathHelper.floor_double(entityPlayer.posX);
+            y = MathHelper.floor_double(entityPlayer.posY);
+            z = MathHelper.floor_double(entityPlayer.posZ);
         }
         writeTarget(itemStack, world, x, y, z);
-        GTUtility.sendChatToPlayer(
-            player,
-            StatCollector.translateToLocalFormatted(
-                "easytech.message.entangled_card.recorded",
-                getDimensionName(world.provider.dimensionId, world),
-                world.provider.dimensionId,
-                x,
-                y,
-                z));
+        sendRecordedMessage(player, world, x, y, z);
         return itemStack;
     }
 
@@ -54,16 +46,20 @@ public class ETHEntangledCard extends GTGenericItem {
         float hitX, float hitY, float hitZ) {
         if (world.isRemote) return true;
         writeTarget(itemStack, world, x, y, z);
-        GTUtility.sendChatToPlayer(
-            player,
-            StatCollector.translateToLocalFormatted(
+        sendRecordedMessage(player, world, x, y, z);
+        return true;
+    }
+
+    private static void sendRecordedMessage(EntityPlayer player, World world, int x, int y, int z) {
+        int dimId = world.provider.dimensionId;
+        player.addChatMessage(
+            new ChatComponentTranslation(
                 "easytech.message.entangled_card.recorded",
-                getDimensionName(world.provider.dimensionId, world),
-                world.provider.dimensionId,
+                createDimensionChatArg(dimId, world),
+                dimId,
                 x,
                 y,
                 z));
-        return true;
     }
 
     @Override
@@ -72,15 +68,16 @@ public class ETHEntangledCard extends GTGenericItem {
         list.add(StatCollector.translateToLocal("easytech.tooltip.entangled_card.usage"));
         list.add(StatCollector.translateToLocal("easytech.tooltip.entangled_card.machine"));
         NBTTagCompound tag = stack.getTagCompound();
-        if (tag == null) {
+        if (!hasTarget(stack) || tag == null) {
             list.add(StatCollector.translateToLocal("easytech.tooltip.entangled_card.empty"));
             return;
         }
+        int dimId = tag.getInteger("dimId");
         list.add(
             StatCollector.translateToLocalFormatted(
                 "easytech.tooltip.entangled_card.dimension",
-                tag.getString("dimName"),
-                tag.getInteger("dimId")));
+                resolveClientDimensionName(tag, dimId),
+                dimId));
         list.add(
             StatCollector.translateToLocalFormatted(
                 "easytech.tooltip.entangled_card.position",
@@ -90,9 +87,15 @@ public class ETHEntangledCard extends GTGenericItem {
     }
 
     private static void writeTarget(ItemStack stack, World world, int x, int y, int z) {
+        int dimId = world.provider.dimensionId;
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("dimId", world.provider.dimensionId);
-        tag.setString("dimName", getDimensionName(world.provider.dimensionId, world));
+        tag.setInteger("dimId", dimId);
+        if (dimId != -1 && dimId != 0 && dimId != 1 && world.provider != null) {
+            String providerName = world.provider.getDimensionName();
+            if (providerName != null && !providerName.isEmpty()) {
+                tag.setString("dimProviderName", providerName);
+            }
+        }
         tag.setInteger("x", x);
         tag.setInteger("y", y);
         tag.setInteger("z", z);
@@ -100,18 +103,43 @@ public class ETHEntangledCard extends GTGenericItem {
     }
 
     public static boolean hasTarget(ItemStack stack) {
-        return stack != null && stack.getItem() instanceof ETHEntangledCard && stack.getTagCompound() != null;
+        if (stack == null || !(stack.getItem() instanceof ETHEntangledCard)) return false;
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag != null && tag.hasKey("dimId") && tag.hasKey("x") && tag.hasKey("y") && tag.hasKey("z");
     }
 
-    public static String getDimensionName(int dimId, World world) {
+    static Object createDimensionChatArg(int dimId, World world) {
+        return switch (dimId) {
+            case -1 -> new ChatComponentTranslation("easytech.dimension.nether");
+            case 0 -> new ChatComponentTranslation("easytech.dimension.overworld");
+            case 1 -> new ChatComponentTranslation("easytech.dimension.the_end");
+            default -> world != null && world.provider != null ? world.provider.getDimensionName()
+                : new ChatComponentTranslation("easytech.tooltip.unknown");
+        };
+    }
+
+    static String resolveClientDimensionName(NBTTagCompound tag, int dimId) {
         return switch (dimId) {
             case -1 -> StatCollector.translateToLocal("easytech.dimension.nether");
             case 0 -> StatCollector.translateToLocal("easytech.dimension.overworld");
             case 1 -> StatCollector.translateToLocal("easytech.dimension.the_end");
             default -> {
-                World targetWorld = world != null ? world : DimensionManager.getWorld(dimId);
-                yield targetWorld == null ? StatCollector.translateToLocal("easytech.tooltip.unknown")
-                    : targetWorld.provider.getDimensionName();
+                if (tag != null) {
+                    if (tag.hasKey("dimProviderName")) {
+                        String raw = tag.getString("dimProviderName");
+                        if (!raw.isEmpty()) yield raw;
+                    }
+                    // Backward compatibility for legacy cards storing "dimName"
+                    if (tag.hasKey("dimName")) {
+                        String legacy = tag.getString("dimName");
+                        if (!legacy.isEmpty()) yield legacy;
+                    }
+                }
+                World targetWorld = DimensionManager.getWorld(dimId);
+                if (targetWorld != null && targetWorld.provider != null) {
+                    yield targetWorld.provider.getDimensionName();
+                }
+                yield StatCollector.translateToLocal("easytech.tooltip.unknown");
             }
         };
     }

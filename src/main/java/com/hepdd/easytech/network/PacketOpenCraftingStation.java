@@ -9,6 +9,8 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.world.IBlockAccess;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.gtnewhorizon.gtnhlib.util.ServerThreadUtil;
+import com.hepdd.easytech.api.objects.PortableCraftingStationContainer;
 import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
 
 import gregtech.api.net.GTPacket;
@@ -28,9 +30,7 @@ public class PacketOpenCraftingStation extends GTPacket {
     }
 
     @Override
-    public void encode(ByteBuf buffer) {
-
-    }
+    public void encode(ByteBuf buffer) {}
 
     @Override
     public GTPacket decode(ByteArrayDataInput buffer) {
@@ -46,15 +46,32 @@ public class PacketOpenCraftingStation extends GTPacket {
 
     @Override
     public void process(IBlockAccess world) {
-        if (player == null) return;
+        final EntityPlayerMP targetPlayer = this.player;
+        if (targetPlayer == null) return;
 
-        for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
-            ItemStack is = player.inventory.getStackInSlot(i);
-            if (is != null && is.getItem() instanceof ETHPortableCraftingStation station) {
-                station.openGUI(player, i);
-                break;
+        ServerThreadUtil.addScheduledTask(() -> {
+            if (targetPlayer.playerNetServerHandler == null || targetPlayer.isDead || targetPlayer.worldObj == null) {
+                return;
             }
-        }
+            if (targetPlayer.openContainer instanceof PortableCraftingStationContainer) {
+                return;
+            }
+            int currentSlot = targetPlayer.inventory.currentItem;
+            ItemStack[] mainInv = targetPlayer.inventory.mainInventory;
+            if (currentSlot >= 0 && currentSlot < mainInv.length) {
+                ItemStack held = mainInv[currentSlot];
+                if (held != null && held.getItem() instanceof ETHPortableCraftingStation station) {
+                    station.openGUI(targetPlayer, currentSlot);
+                    return;
+                }
+            }
+            for (int i = 0; i < mainInv.length; i++) {
+                ItemStack is = mainInv[i];
+                if (is != null && is.getItem() instanceof ETHPortableCraftingStation station) {
+                    station.openGUI(targetPlayer, i);
+                    break;
+                }
+            }
+        });
     }
-
 }

@@ -16,6 +16,7 @@ public class ETHPortableCraftingStation extends GTGenericItem {
 
     public ETHPortableCraftingStation(String aUnlocalized, String aEnglish, String aEnglishTooltip) {
         super(aUnlocalized, aEnglish, aEnglishTooltip);
+        setMaxStackSize(1);
     }
 
     @Override
@@ -34,27 +35,7 @@ public class ETHPortableCraftingStation extends GTGenericItem {
     protected void addAdditionalToolTips(List<String> aList, ItemStack aStack, EntityPlayer aPlayer) {
         super.addAdditionalToolTips(aList, aStack, aPlayer);
         aList.add(StatCollector.translateToLocal("easytech.tooltip.portable_crafting_station.usage"));
-        aList.add(
-            StatCollector
-                .translateToLocalFormatted("easytech.tooltip.portable_crafting_station.key", getOpenKeyName()));
-    }
-
-    private String getOpenKeyName() {
-        try {
-            Object keyBinding = Class.forName("com.hepdd.easytech.loaders.preload.ETHLoaderKeybind")
-                .getField("openCraftingStation")
-                .get(null);
-            if (keyBinding == null) return "None";
-            int keyCode = (int) keyBinding.getClass()
-                .getMethod("getKeyCode")
-                .invoke(keyBinding);
-            if (keyCode == 0) return "None";
-            Object keyName = Class.forName("org.lwjgl.input.Keyboard")
-                .getMethod("getKeyName", int.class)
-                .invoke(null, keyCode);
-            return keyName == null ? "None" : keyName.toString();
-        } catch (ReflectiveOperationException e) {
-            return "None";
-        }
+        String keyName = EasyTechnology.proxy != null ? EasyTechnology.proxy.getOpenCraftingStationKeyName() : "None";
+        aList.add(StatCollector.translateToLocalFormatted("easytech.tooltip.portable_crafting_station.key", keyName));
     }
 }

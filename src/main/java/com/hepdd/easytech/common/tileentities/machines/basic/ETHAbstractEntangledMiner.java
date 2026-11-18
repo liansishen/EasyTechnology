@@ -1,10 +1,9 @@
 package com.hepdd.easytech.common.tileentities.machines.basic;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -16,6 +15,7 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -45,25 +45,32 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     protected static final int[] RADIUS = { 8, 8, 16, 24, 32 };
     protected static final int[] SPEED = { 240, 240, 160, 80, 40 };
     protected static final int[] ENERGY = { 2, 4, 32, 128, 512 };
+    protected static final int SCAN_COMPLETE_Y = EntangledMinerScanHelper.SCAN_COMPLETE_Y;
     private static final int SCAN_BLOCKS_PER_TICK = 64;
 
-    protected final ArrayList<ChunkPosition> oreBlockPositions = new ArrayList<>();
+    protected final ArrayDeque<ChunkPosition> oreBlockPositions = new ArrayDeque<>();
     protected final int minerTier;
     protected final int rangeTier;
     protected int mSpeed;
     protected int radiusConfig;
 
     protected ChunkCoordIntPair targetChunk;
+    protected boolean hasTarget;
     protected int targetDimId;
     protected int targetX;
     protected int targetY;
     protected int targetZ;
     protected int currentScanY = 256;
-    protected String lastTargetKey = "";
-    protected ChunkCoordIntPair loadedChunk;
+
+    protected boolean hasLoadedChunk;
+    protected int loadedChunkX;
+    protected int loadedChunkZ;
+
     protected final XSTR miningRng = new XSTR();
     protected int burnTime;
-    protected int scanIndex;
+    protected int scanChunkCursor;
+    protected int scanBlockInChunkCursor;
+    protected boolean reverseChunkOrder;
     protected boolean scanPlaneActive;
 
     protected ETHAbstractEntangledMiner(int aID, String aName, String aNameRegional, int aTier, int aMinerTier,
@@ -185,7 +192,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             + "Easy"
             + EnumChatFormatting.AQUA
             + EnumChatFormatting.BOLD
-            + "Technology";;
+            + "Technology";
         return description;
     }
 
@@ -319,7 +326,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             getEnergyDisplayString() };
     }
 
-    // ==================== onPostTick (core logic from MTEMiner) ====================
+    // ==================== onPostTick (chunk-grouped scan & mine) ====================
 
     @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
@@ -331,7 +338,7 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             mMaxProgresstime = 0;
             mProgresstime = 0;
             currentScanY = 256;
-            lastTargetKey = "";
+            hasTarget = false;
             return;
         }
 
@@ -352,11 +359,13 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         if (oreBlockPositions.isEmpty()) {
             if (!scanPlaneActive) {
                 if (currentScanY <= 0) {
+                    currentScanY = EntangledMinerScanHelper.SCAN_COMPLETE_Y;
                     releaseLoadedChunk();
                     aBaseMetaTileEntity.disableWorking();
                     return;
                 }
                 currentScanY--;
+                reverseChunkOrder = !reverseChunkOrder;
                 resetScanPlane();
                 scanPlaneActive = true;
             }
@@ -365,7 +374,11 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             if (scanComplete) scanPlaneActive = false;
             if (oreBlockPositions.isEmpty()) {
                 mMaxProgresstime = 0;
-                if (scanComplete) releaseLoadedChunk();
+                if (scanComplete && currentScanY <= 0) {
+                    currentScanY = EntangledMinerScanHelper.SCAN_COMPLETE_Y;
+                    releaseLoadedChunk();
+                    aBaseMetaTileEntity.disableWorking();
+                }
                 return;
             }
         }
@@ -387,39 +400,57 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         consumeEnergy(aBaseMetaTileEntity, ENERGY[minerTier]);
 
         if (mProgresstime == mSpeed - 1) {
-            ChunkPosition pos = oreBlockPositions.get(0);
-            int worldX = targetX + pos.chunkPosX;
-            int worldY = pos.chunkPosY;
-            int worldZ = targetZ + pos.chunkPosZ;
+            ChunkPosition pos = oreBlockPositions.peekFirst();
+            if (pos != null) {
+                int worldX = pos.chunkPosX;
+                int worldY = pos.chunkPosY;
+                int worldZ = pos.chunkPosZ;
 
-            World world = loadTargetChunk(worldX, worldZ);
-            if (world != null) {
-                Block block = world.getBlock(worldX, worldY, worldZ);
-                int meta = world.getBlockMetadata(worldX, worldY, worldZ);
-                if (GTUtility.isOre(block, meta)) {
-                    long seed = miningRng.getSeed();
-                    List<ItemStack> drops = OreManager
-                        .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), true, true);
+                World world = ensureTargetChunkLoaded(worldX >> 4, worldZ >> 4);
+                if (world != null) {
+                    Block block = world.getBlock(worldX, worldY, worldZ);
+                    int meta = world.getBlockMetadata(worldX, worldY, worldZ);
+                    if (GTUtility.isOre(block, meta)) {
+                        long seed = miningRng.getSeed();
+                        List<ItemStack> drops = OreManager.mineBlock(
+                            miningRng,
+                            world,
+                            worldX,
+                            worldY,
+                            worldZ,
+                            false,
+                            getOreFortuneTier(),
+                            true,
+                            true);
 
-                    ItemStack[] plannedOutputs = planOutputInsertion(drops);
-                    miningRng.setSeed(seed);
-                    if (plannedOutputs == null) {
-                        releaseLoadedChunk();
-                        return;
+                        ItemStack[] plannedOutputs = planOutputInsertion(drops);
+                        miningRng.setSeed(seed);
+                        if (plannedOutputs == null) {
+                            releaseLoadedChunk();
+                            return;
+                        }
+
+                        OreManager.mineBlock(
+                            miningRng,
+                            world,
+                            worldX,
+                            worldY,
+                            worldZ,
+                            false,
+                            getOreFortuneTier(),
+                            false,
+                            true);
+                        commitOutputPlan(plannedOutputs);
                     }
-
-                    OreManager
-                        .mineBlock(miningRng, world, worldX, worldY, worldZ, false, getOreFortuneTier(), false, true);
-                    commitOutputPlan(plannedOutputs);
+                    oreBlockPositions.pollFirst();
                 }
-                oreBlockPositions.remove(0);
             }
         }
     }
 
     @Override
-    public void onScrewdriverRightClick(net.minecraftforge.common.util.ForgeDirection aSide,
-        net.minecraft.entity.player.EntityPlayer aPlayer, float aX, float aY, float aZ, ItemStack aStack) {
+    public void onScrewdriverRightClick(ForgeDirection aSide, net.minecraft.entity.player.EntityPlayer aPlayer,
+        float aX, float aY, float aZ, ItemStack aStack) {
         super.onScrewdriverRightClick(aSide, aPlayer, aX, aY, aZ, aStack);
         if (aSide != getBaseMetaTileEntity().getFrontFacing() && aSide != mMainFacing) {
             if (aPlayer.isSneaking()) {
@@ -436,56 +467,82 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         }
     }
 
-    // ==================== Ore scanning ====================
+    // ==================== Chunk-by-chunk ore scanning ====================
 
     protected boolean scanOreBatch() {
-        int sideLength = radiusConfig * 2 + 1;
-        int totalBlocks = sideLength * sideLength;
+        int totalChunks = EntangledMinerScanHelper.totalChunks(targetX, targetZ, radiusConfig);
         int scanned = 0;
 
-        while (scanIndex < totalBlocks && scanned < SCAN_BLOCKS_PER_TICK) {
-            int dx = scanIndex / sideLength - radiusConfig;
-            int dz = scanIndex % sideLength - radiusConfig;
-            int worldX = targetX + dx;
-            int worldZ = targetZ + dz;
-            World world = loadTargetChunk(worldX, worldZ);
-            if (world == null) return false;
+        while (scanChunkCursor < totalChunks && scanned < SCAN_BLOCKS_PER_TICK) {
+            long packedChunk = EntangledMinerScanHelper
+                .chunkAtCursor(targetX, targetZ, radiusConfig, scanChunkCursor, reverseChunkOrder);
+            int chunkX = EntangledMinerScanHelper.unpackChunkX(packedChunk);
+            int chunkZ = EntangledMinerScanHelper.unpackChunkZ(packedChunk);
 
-            Block block = world.getBlock(worldX, currentScanY, worldZ);
-            int meta = world.getBlockMetadata(worldX, currentScanY, worldZ);
-            if (GTUtility.isOre(block, meta)) {
-                oreBlockPositions.add(new ChunkPosition(dx, currentScanY, dz));
+            int cMinX = EntangledMinerScanHelper.clampMinInChunk(targetX, radiusConfig, chunkX);
+            int cMaxX = EntangledMinerScanHelper.clampMaxInChunk(targetX, radiusConfig, chunkX);
+            int cMinZ = EntangledMinerScanHelper.clampMinInChunk(targetZ, radiusConfig, chunkZ);
+            int cMaxZ = EntangledMinerScanHelper.clampMaxInChunk(targetZ, radiusConfig, chunkZ);
+            int spanZ = cMaxZ - cMinZ + 1;
+            int blocksInChunk = (cMaxX - cMinX + 1) * spanZ;
+
+            World world = ensureTargetChunkLoaded(chunkX, chunkZ);
+            if (world == null) return false;
+            Chunk chunk = world.getChunkFromChunkCoords(chunkX, chunkZ);
+            if (chunk == null) return false;
+
+            while (scanBlockInChunkCursor < blocksInChunk && scanned < SCAN_BLOCKS_PER_TICK) {
+                int worldX = cMinX + (scanBlockInChunkCursor / spanZ);
+                int worldZ = cMinZ + (scanBlockInChunkCursor % spanZ);
+                int localX = worldX & 15;
+                int localZ = worldZ & 15;
+
+                Block block = chunk.getBlock(localX, currentScanY, localZ);
+                int meta = chunk.getBlockMetadata(localX, currentScanY, localZ);
+                if (GTUtility.isOre(block, meta)) {
+                    oreBlockPositions.addLast(new ChunkPosition(worldX, currentScanY, worldZ));
+                }
+                scanBlockInChunkCursor++;
+                scanned++;
             }
-            scanIndex++;
-            scanned++;
+
+            if (scanBlockInChunkCursor >= blocksInChunk) {
+                scanChunkCursor++;
+                scanBlockInChunkCursor = 0;
+            }
         }
-        return scanIndex >= totalBlocks;
+        return scanChunkCursor >= totalChunks;
     }
 
     protected void resetScanPlane() {
-        scanIndex = 0;
+        scanChunkCursor = 0;
+        scanBlockInChunkCursor = 0;
     }
 
     // ==================== Entangled card target ====================
 
     protected boolean updateTargetFromCard() {
         ItemStack card = getInputAt(0);
-        if (card == null || !(card.getItem() instanceof ETHEntangledCard)) return false;
+        if (!ETHEntangledCard.hasTarget(card)) return false;
         NBTTagCompound tag = card.getTagCompound();
-        if (tag == null || !tag.hasKey("dimId")) return false;
+        if (tag == null) return false;
 
-        String key = tag.getInteger(
-            "dimId") + ":" + tag.getInteger("x") + ":" + tag.getInteger("y") + ":" + tag.getInteger("z");
-        if (!Objects.equals(key, lastTargetKey)) {
-            lastTargetKey = key;
-            targetDimId = tag.getInteger("dimId");
-            targetX = tag.getInteger("x");
-            targetY = tag.getInteger("y");
-            targetZ = tag.getInteger("z");
+        int dimId = tag.getInteger("dimId");
+        int x = tag.getInteger("x");
+        int y = tag.getInteger("y");
+        int z = tag.getInteger("z");
+
+        if (!hasTarget || dimId != targetDimId || x != targetX || y != targetY || z != targetZ) {
+            hasTarget = true;
+            targetDimId = dimId;
+            targetX = x;
+            targetY = y;
+            targetZ = z;
             targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
             currentScanY = targetY;
             oreBlockPositions.clear();
             scanPlaneActive = false;
+            reverseChunkOrder = false;
             resetScanPlane();
             releaseLoadedChunk();
             mMaxProgresstime = 0;
@@ -494,24 +551,40 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         return true;
     }
 
-    protected World loadTargetChunk(int worldX, int worldZ) {
-        ChunkCoordIntPair chunk = new ChunkCoordIntPair(worldX >> 4, worldZ >> 4);
-        if (chunk.equals(loadedChunk)) return DimensionManager.getWorld(targetDimId);
-        releaseLoadedChunk();
-        World world = DimensionManager.getWorld(targetDimId);
-        if (world == null) return null;
-        if (!GTChunkManagerEx.requestPlayerChunkLoad((TileEntity) getBaseMetaTileEntity(), chunk, "", targetDimId)) {
+    protected World ensureTargetChunkLoaded(int chunkX, int chunkZ) {
+        if (hasLoadedChunk && chunkX == loadedChunkX && chunkZ == loadedChunkZ) {
+            World cachedWorld = DimensionManager.getWorld(targetDimId);
+            if (cachedWorld != null) {
+                return cachedWorld;
+            }
+        }
+        IGregTechTileEntity base = getBaseMetaTileEntity();
+        if (!(base instanceof TileEntity tileEntity)) {
             return null;
         }
-        loadedChunk = chunk;
-        world.getChunkFromChunkCoords(chunk.chunkXPos, chunk.chunkZPos);
+        if (!GTChunkManagerEx
+            .switchChunkLoad(tileEntity, chunkX, chunkZ, loadedChunkX, loadedChunkZ, hasLoadedChunk, targetDimId)) {
+            return null;
+        }
+        World world = DimensionManager.getWorld(targetDimId);
+        if (world == null) {
+            return null;
+        }
+        hasLoadedChunk = true;
+        loadedChunkX = chunkX;
+        loadedChunkZ = chunkZ;
+        world.getChunkFromChunkCoords(chunkX, chunkZ);
         return world;
     }
 
+    protected World loadTargetChunk(int worldX, int worldZ) {
+        return ensureTargetChunkLoaded(worldX >> 4, worldZ >> 4);
+    }
+
     protected void releaseLoadedChunk() {
-        ChunkCoordIntPair oldLoadedChunk = loadedChunk;
-        loadedChunk = null;
-        if (oldLoadedChunk != null && getBaseMetaTileEntity() instanceof TileEntity tileEntity) {
+        boolean wasLoaded = hasLoadedChunk;
+        hasLoadedChunk = false;
+        if (wasLoaded && getBaseMetaTileEntity() instanceof TileEntity tileEntity) {
             GTChunkManagerEx.releaseTicket(tileEntity);
         }
     }
@@ -595,6 +668,12 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
     }
 
     @Override
+    public void onUnload() {
+        releaseLoadedChunk();
+        super.onUnload();
+    }
+
+    @Override
     public void inValidate() {
         releaseLoadedChunk();
         super.inValidate();
@@ -605,12 +684,16 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
         super.saveNBTData(aNBT);
         aNBT.setInteger("ETHBurnTime", burnTime);
         aNBT.setInteger("radiusConfig", radiusConfig);
-        if (lastTargetKey != null) aNBT.setString("ETHTargetKey", lastTargetKey);
+        aNBT.setBoolean("ETHHasTarget", hasTarget);
+        if (hasTarget) {
+            aNBT.setString("ETHTargetKey", targetDimId + ":" + targetX + ":" + targetY + ":" + targetZ);
+        }
         aNBT.setInteger("ETHTargetDim", targetDimId);
         aNBT.setInteger("ETHTargetX", targetX);
         aNBT.setInteger("ETHTargetY", targetY);
         aNBT.setInteger("ETHTargetZ", targetZ);
         aNBT.setInteger("ETHCurrentScanY", currentScanY);
+        aNBT.setBoolean("ETHScanComplete", EntangledMinerScanHelper.isScanComplete(hasTarget, currentScanY));
     }
 
     @Override
@@ -621,14 +704,23 @@ public abstract class ETHAbstractEntangledMiner extends MTEBasicMachine implemen
             int saved = aNBT.getInteger("radiusConfig");
             if (saved >= 0 && saved <= RADIUS[rangeTier]) radiusConfig = saved;
         }
-        lastTargetKey = aNBT.getString("ETHTargetKey");
+        hasTarget = aNBT.getBoolean("ETHHasTarget") || (aNBT.hasKey("ETHTargetKey") && !aNBT.getString("ETHTargetKey")
+            .isEmpty());
         targetDimId = aNBT.getInteger("ETHTargetDim");
         targetX = aNBT.getInteger("ETHTargetX");
         targetY = aNBT.getInteger("ETHTargetY");
         targetZ = aNBT.getInteger("ETHTargetZ");
         targetChunk = new ChunkCoordIntPair(targetX >> 4, targetZ >> 4);
-        currentScanY = aNBT.hasKey("ETHCurrentScanY") ? aNBT.getInteger("ETHCurrentScanY") : targetY;
+        int savedScanY = aNBT.hasKey("ETHCurrentScanY") ? aNBT.getInteger("ETHCurrentScanY") : targetY;
+        boolean hasScanCompleteTag = aNBT.hasKey("ETHScanComplete");
+        currentScanY = EntangledMinerScanHelper.resolveLoadedScanY(
+            hasTarget,
+            targetY,
+            savedScanY,
+            hasScanCompleteTag,
+            hasScanCompleteTag && aNBT.getBoolean("ETHScanComplete"));
+        reverseChunkOrder = false;
         resetScanPlane();
-        scanPlaneActive = true;
+        scanPlaneActive = EntangledMinerScanHelper.shouldResumePlaneScan(hasTarget, currentScanY, targetY);
     }
 }

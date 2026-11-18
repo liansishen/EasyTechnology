@@ -1,11 +1,13 @@
 package com.hepdd.easytech.proxy;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import com.hepdd.easytech.EasyTechnology;
 import com.hepdd.easytech.api.gui.PortableCraftingStationGui;
 import com.hepdd.easytech.api.objects.PortableCraftingStationContainer;
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
 
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -19,20 +21,27 @@ public class GuiHandler implements IGuiHandler {
         NetworkRegistry.INSTANCE.registerGuiHandler(EasyTechnology.instance, new GuiHandler());
     }
 
+    private static boolean isValidStationSlot(EntityPlayer player, int slotIndex) {
+        if (player == null || slotIndex < 0 || slotIndex >= player.inventory.mainInventory.length) {
+            return false;
+        }
+        ItemStack stack = player.inventory.getStackInSlot(slotIndex);
+        return stack != null && stack.getItem() instanceof ETHPortableCraftingStation;
+    }
+
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        if (ID == GUI1) {
+        if (ID == GUI1 && isValidStationSlot(player, x)) {
             CraftingStationLogic logic = new CraftingStationLogic();
             logic.setWorldObj(world);
             return new PortableCraftingStationContainer(player.inventory, logic, x);
         }
-
         return null;
     }
 
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        if (ID == GUI1) {
+        if (ID == GUI1 && isValidStationSlot(player, x)) {
             CraftingStationLogic logic = new CraftingStationLogic();
             logic.setWorldObj(world);
             return new PortableCraftingStationGui(player.inventory, logic, x);

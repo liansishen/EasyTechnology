@@ -15,6 +15,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.world.World;
 
+import com.hepdd.easytech.common.tileentities.machines.basic.ETHPortableCraftingStation;
+
 import tconstruct.items.tools.Arrow;
 import tconstruct.items.tools.BowBase;
 import tconstruct.library.crafting.ModifyBuilder;
@@ -31,6 +33,7 @@ public class PortableCraftingStationContainer extends Container {
 
     private final World worldObj;
     private final int openerSlot;
+    private final int lockedSlotIndex;
     @SuppressWarnings("rawtypes")
     private final WeakReference[] inventories;
 
@@ -43,6 +46,23 @@ public class PortableCraftingStationContainer extends Container {
     public CraftingStationLogic logic;
     EntityPlayer player;
 
+    private static final class LockedPlayerSlot extends Slot {
+
+        LockedPlayerSlot(IInventory inventory, int index, int x, int y) {
+            super(inventory, index, x, y);
+        }
+
+        @Override
+        public boolean canTakeStack(EntityPlayer player) {
+            return false;
+        }
+
+        @Override
+        public boolean isItemValid(ItemStack stack) {
+            return false;
+        }
+    }
+
     public PortableCraftingStationContainer(InventoryPlayer inventoryplayer, CraftingStationLogic logic, int slotId) {
         this.worldObj = logic.getWorldObj();
         this.openerSlot = slotId;
@@ -53,6 +73,7 @@ public class PortableCraftingStationContainer extends Container {
         this.inventories = logic.getInventories();
 
         int row, col;
+        int resolvedLockedSlot = -1;
 
         final int craftingOffsetX = 30;
         final int inventoryOffsetX = 8;
@@ -74,79 +95,34 @@ public class PortableCraftingStationContainer extends Container {
                     new Slot(this.craftMatrix, col + row * 3, craftingOffsetX + col * 18, 17 + row * 18));
             }
         }
-        int slotIndex = 0;
-        // Player Inventory 10 - 36
+
+        // Player Inventory 10 - 36 (InventoryPlayer indices 9 - 35)
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                if (slotIndex == (this.openerSlot - 9)) {
-                    this.addSlotToContainer(
-                        new Slot(inventoryplayer, col + row * 9 + 9, inventoryOffsetX + col * 18, 84 + row * 18) {
-
-                            @Override
-                            public boolean canTakeStack(EntityPlayer player) {
-                                return false;
-                            }
-
-                            @Override
-                            public void onPickupFromSlot(EntityPlayer player, ItemStack stack) {}
-
-                            @Override
-                            public boolean isItemValid(ItemStack stack) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean getHasStack() {
-                                return false;
-                            }
-
-                            @Override
-                            public ItemStack decrStackSize(int i) {
-                                return null;
-                            }
-                        });
+                int invIndex = col + row * 9 + 9;
+                if (invIndex == this.openerSlot) {
+                    Slot locked = this.addSlotToContainer(
+                        new LockedPlayerSlot(inventoryplayer, invIndex, inventoryOffsetX + col * 18, 84 + row * 18));
+                    resolvedLockedSlot = locked.slotNumber;
                 } else {
                     this.addSlotToContainer(
-                        new Slot(inventoryplayer, col + row * 9 + 9, inventoryOffsetX + col * 18, 84 + row * 18));
+                        new Slot(inventoryplayer, invIndex, inventoryOffsetX + col * 18, 84 + row * 18));
                 }
-                slotIndex++;
             }
         }
-        slotIndex = 0;
-        // Player Hotbar - 37 - 45
+
+        // Player Hotbar 37 - 45 (InventoryPlayer indices 0 - 8)
         for (col = 0; col < 9; ++col) {
-            if (slotIndex == this.openerSlot) {
-                this.addSlotToContainer(new Slot(inventoryplayer, col, inventoryOffsetX + col * 18, 142) {
-
-                    @Override
-                    public boolean canTakeStack(EntityPlayer player) {
-                        return false;
-                    }
-
-                    @Override
-                    public void onPickupFromSlot(EntityPlayer player, ItemStack stack) {}
-
-                    @Override
-                    public boolean isItemValid(ItemStack stack) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean getHasStack() {
-                        return false;
-                    }
-
-                    @Override
-                    public ItemStack decrStackSize(int i) {
-                        return null;
-                    }
-                });
+            if (col == this.openerSlot) {
+                Slot locked = this
+                    .addSlotToContainer(new LockedPlayerSlot(inventoryplayer, col, inventoryOffsetX + col * 18, 142));
+                resolvedLockedSlot = locked.slotNumber;
             } else {
                 this.addSlotToContainer(new Slot(inventoryplayer, col, inventoryOffsetX + col * 18, 142));
             }
-            slotIndex++;
         }
 
+        this.lockedSlotIndex = resolvedLockedSlot;
         this.onCraftMatrixChanged(this.craftMatrix);
     }
 
@@ -166,7 +142,11 @@ public class PortableCraftingStationContainer extends Container {
         return null;
     }
 
+    @Override
     public ItemStack transferStackInSlot(EntityPlayer entityPlayer, int index) {
+        if (index == this.lockedSlotIndex) {
+            return null;
+        }
         Slot slot = (Slot) this.inventorySlots.get(index);
 
         if (slot == null || !slot.getHasStack()) {
@@ -230,8 +210,6 @@ public class PortableCraftingStationContainer extends Container {
     protected boolean moveToCraftingGrid(ItemStack itemstack) {
         if (itemstack == null || itemstack.stackSize <= 0) return false;
 
-        // We make a special check for tinker tools to move into the center of the crafting grid. This makes applying
-        // modifiers just a little bit more convenient.
         Item item = itemstack.getItem();
         if (item instanceof Arrow || item instanceof BowBase
             || item instanceof HarvestTool
@@ -239,7 +217,6 @@ public class PortableCraftingStationContainer extends Container {
             || item instanceof AmmoItem
             || item instanceof ProjectileWeapon) {
 
-            // We simply want to check if we are able to insert it into the center. If not, we continue as normal.
             boolean wasAbleToInsertIntoCenter = this.mergeItemStack(itemstack, 5, 6, false);
             if (wasAbleToInsertIntoCenter) {
                 return true;
@@ -249,10 +226,13 @@ public class PortableCraftingStationContainer extends Container {
         return !this.mergeItemStack(itemstack, 1, 10, true);
     }
 
+    @Override
     public boolean func_94530_a /* canMergeSlot */(ItemStack par1ItemStack, Slot par2Slot) {
-        return par2Slot.inventory != this.craftResult && super.func_94530_a(par1ItemStack, par2Slot);
+        return par2Slot.inventory != this.craftResult && par2Slot.slotNumber != this.lockedSlotIndex
+            && super.func_94530_a(par1ItemStack, par2Slot);
     }
 
+    @Override
     public void onCraftMatrixChanged(IInventory par1IInventory) {
         ItemStack tool = modifyItem();
         if (tool != null) this.craftResult.setInventorySlotContents(0, tool);
@@ -279,7 +259,7 @@ public class PortableCraftingStationContainer extends Container {
                 otherInventorySlot = (Slot) this.inventorySlots.get(slotIndex);
                 copyStack = otherInventorySlot.getStack();
 
-                if (copyStack == null && otherInventorySlot.isItemValid(stack)) {
+                if (slotIndex != this.lockedSlotIndex && copyStack == null && otherInventorySlot.isItemValid(stack)) {
                     otherInventorySlot.putStack(stack.copy());
                     otherInventorySlot.onSlotChanged();
                     stack.stackSize = 0;
@@ -325,7 +305,9 @@ public class PortableCraftingStationContainer extends Container {
                 slot = (Slot) this.inventorySlots.get(k);
                 itemstack1 = slot.getStack();
 
-                if (itemstack1 != null && itemstack1.getItem() == stack.getItem()
+                if (k != this.lockedSlotIndex && itemstack1 != null
+                    && slot.isItemValid(stack)
+                    && itemstack1.getItem() == stack.getItem()
                     && (!stack.getHasSubtypes() || stack.getItemDamage() == itemstack1.getItemDamage())
                     && ItemStack.areItemStackTagsEqual(stack, itemstack1)
                     && this.func_94530_a /* canMergeSlot */(stack, slot)) {
@@ -366,10 +348,10 @@ public class PortableCraftingStationContainer extends Container {
             final Slot slot = (Slot) this.inventorySlots.get(k);
             ItemStack itemstack1 = slot.getStack();
 
-            if ((itemstack1 == null || itemstack1.stackSize == 0) && slot.isItemValid(stack)
+            if (k != this.lockedSlotIndex && (itemstack1 == null || itemstack1.stackSize == 0)
+                && slot.isItemValid(stack)
                 && this.func_94530_a /* canMergeSlot */(stack, slot)) {
-                // Forge: Make sure to respect isItemValid in the slot.
-                int limit = slot.getSlotStackLimit();
+                int limit = Math.min(stack.getMaxStackSize(), slot.getSlotStackLimit());
                 ItemStack stack2 = stack.copy();
                 if (stack2.stackSize > limit) {
                     stack2.stackSize = limit;
@@ -395,7 +377,10 @@ public class PortableCraftingStationContainer extends Container {
 
     @Override
     public boolean canInteractWith(EntityPlayer player) {
-        return true;
+        if (player == null || player.isDead) return false;
+        if (this.openerSlot < 0 || this.openerSlot >= player.inventory.mainInventory.length) return false;
+        ItemStack stack = player.inventory.getStackInSlot(this.openerSlot);
+        return stack != null && stack.getItem() instanceof ETHPortableCraftingStation;
     }
 
     @Override
@@ -415,7 +400,8 @@ public class PortableCraftingStationContainer extends Container {
 
     @Override
     public ItemStack slotClick(int slotId, int clickedButton, int mode, EntityPlayer player) {
-        if (mode == 2 && this.openerSlot == clickedButton) {
+        if (PortableCraftingStationSlotRules
+            .shouldBlockSlotClick(slotId, clickedButton, mode, this.openerSlot, this.lockedSlotIndex)) {
             return null;
         }
         return super.slotClick(slotId, clickedButton, mode, player);

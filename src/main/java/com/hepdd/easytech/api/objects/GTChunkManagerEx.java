@@ -2,6 +2,7 @@ package com.hepdd.easytech.api.objects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,11 +12,14 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.hepdd.easytech.EasyTechnology;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import gregtech.api.enums.GTValues;
 
 public class GTChunkManagerEx
@@ -26,24 +30,33 @@ public class GTChunkManagerEx
 
     public static void init() {
         ForgeChunkManager.setForcedChunkLoadingCallback(EasyTechnology.instance, instance);
+        MinecraftForge.EVENT_BUS.register(instance);
+    }
+
+    @SubscribeEvent
+    public void onWorldUnload(WorldEvent.Unload event) {
+        if (event.world == null || event.world.isRemote) return;
+        Iterator<Map.Entry<TileEntity, ForgeChunkManager.Ticket>> it = registeredTickets.entrySet()
+            .iterator();
+        while (it.hasNext()) {
+            Map.Entry<TileEntity, ForgeChunkManager.Ticket> entry = it.next();
+            TileEntity owner = entry.getKey();
+            ForgeChunkManager.Ticket ticket = entry.getValue();
+            if (ticket == null) {
+                it.remove();
+                continue;
+            }
+            if (ticket.world == event.world || (owner != null && owner.getWorldObj() == event.world)) {
+                if (ticket.world != event.world) {
+                    ForgeChunkManager.releaseTicket(ticket);
+                }
+                it.remove();
+            }
+        }
     }
 
     @Override
     public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {}
-
-    /**
-     * Determines if tickets should be kept. Based on if the ticket is a machine or a working-chunk ticket.
-     * Working-chunk tickets are tossed and recreated when the machine reactivates.
-     * Machine tickets are kept only if the config {@code alwaysReloadChunkloaders} is true.
-     * Otherwise, machine chunks are tossed and recreated only when the machine reactivates,
-     * similarly to a Passive Anchor.
-     *
-     * @param tickets        The tickets that you will want to select from.
-     *                       The list is immutable and cannot be manipulated directly. Copy it first.
-     * @param world          The world
-     * @param maxTicketCount The maximum number of tickets that will be allowed.
-     * @return list of tickets
-     */
 
     @Override
     public List<ForgeChunkManager.Ticket> ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world,
@@ -52,133 +65,127 @@ public class GTChunkManagerEx
         return new ArrayList<>();
     }
 
-    /**
-     * Determines if player tickets should be kept. This is where a ticket list per-player would be created and
-     * maintained. When a player joins, an event occurs, their name/UUID/etc is compared against tickets on this list
-     * and those tickets are reactivated.
-     * Since that info would be maintained/dealt with on a per-player startup, the list returned back to Forge is empty.
-     *
-     * @param tickets The tickets that you will want to select from.
-     *                The list is immutable and cannot be manipulated directly. Copy it first.
-     * @param world   The world
-     * @return the list of string-ticket paris
-     */
     @Override
     public ListMultimap<String, ForgeChunkManager.Ticket> playerTicketsLoaded(
         ListMultimap<String, ForgeChunkManager.Ticket> tickets, World world) {
-        // Not currently used, so just return an empty list.
         return ArrayListMultimap.create();
     }
 
-    /**
-     * Requests a chunk to be loaded for this machine. May pass a {@code null} chunk to load just the machine itself if
-     * {@code alwaysReloadChunkloaders} is enabled in config.
-     *
-     * @param owner   owner of the TileEntity
-     * @param chunkXZ chunk coordinates
-     * @param player  player
-     * @return if the chunk was loaded successfully
-     */
     public static boolean requestPlayerChunkLoad(TileEntity owner, ChunkCoordIntPair chunkXZ, String player) {
-        if (!GTValues.enableChunkloaders) return false;
-        if (!GTValues.alwaysReloadChunkloaders && chunkXZ == null) return false;
-        if (GTValues.debugChunkloaders && chunkXZ != null) EasyTechnology.LOG
-            .debug("GTChunkManager: Chunk request: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
-        if (instance.registeredTickets.containsKey(owner)) {
-            ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
-            if (ticket.world != owner.getWorldObj()) {
-                releaseTicket(owner);
-                return requestPlayerChunkLoad(owner, chunkXZ, player);
-            }
-            ForgeChunkManager.forceChunk(ticket, chunkXZ);
-        } else {
-            ForgeChunkManager.Ticket ticket;
-            if (player.isEmpty()) ticket = ForgeChunkManager
-                .requestTicket(EasyTechnology.instance, owner.getWorldObj(), ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager.requestPlayerTicket(
-                EasyTechnology.instance,
-                player,
-                owner.getWorldObj(),
-                ForgeChunkManager.Type.NORMAL);
-            if (ticket == null) {
-                if (GTValues.debugChunkloaders)
-                    EasyTechnology.LOG.debug("GTChunkManager: ForgeChunkManager.requestTicket failed");
-                return false;
-            }
-            if (GTValues.debugChunkloaders) EasyTechnology.LOG.debug(
-                "GTChunkManager: ticket issued for machine at: (" + owner.xCoord
-                    + ", "
-                    + owner.yCoord
-                    + ", "
-                    + owner.zCoord
-                    + ")");
-            NBTTagCompound tag = ticket.getModData();
-            tag.setInteger("OwnerX", owner.xCoord);
-            tag.setInteger("OwnerY", owner.yCoord);
-            tag.setInteger("OwnerZ", owner.zCoord);
-            tag.setInteger("ETHOwnerDim", owner.getWorldObj().provider.dimensionId);
-            tag.setInteger("ETHTargetDim", owner.getWorldObj().provider.dimensionId);
-            tag.setInteger("ETHSchema", 1);
-            tag.setString("ETHTicketType", "working_target");
-            tag.setString(
-                "OwnerType",
-                owner.getClass()
-                    .getSimpleName());
-            ForgeChunkManager.forceChunk(ticket, chunkXZ);
-            instance.registeredTickets.put(owner, ticket);
-        }
-        return true;
+        if (owner == null || owner.getWorldObj() == null) return false;
+        return requestPlayerChunkLoad(owner, chunkXZ, player, owner.getWorldObj().provider.dimensionId);
     }
 
     public static boolean requestPlayerChunkLoad(TileEntity owner, ChunkCoordIntPair chunkXZ, String player,
         int dimId) {
+        if (owner == null) return false;
         if (!GTValues.enableChunkloaders) return false;
         if (!GTValues.alwaysReloadChunkloaders && chunkXZ == null) return false;
-        World world = DimensionManager.getWorld(dimId);
+        World world = resolveWorld(dimId);
         if (world == null) return false;
-        if (GTValues.debugChunkloaders && chunkXZ != null) EasyTechnology.LOG
-            .debug("GTChunkManager: Chunk request: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
-        if (instance.registeredTickets.containsKey(owner)) {
-            ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
-            if (ticket.world != world) {
-                releaseTicket(owner);
-                return requestPlayerChunkLoad(owner, chunkXZ, player, dimId);
-            }
+        if (GTValues.debugChunkloaders && chunkXZ != null) {
+            EasyTechnology.LOG
+                .debug("GTChunkManager: Chunk request: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
+        }
+        ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
+        if (ticket != null && ticket.world != world) {
+            releaseTicket(owner);
+            ticket = null;
+        }
+        if (ticket == null) {
+            ticket = createTicket(owner, world, player, dimId);
+            if (ticket == null) return false;
+            instance.registeredTickets.put(owner, ticket);
+        }
+        if (chunkXZ != null) {
             ForgeChunkManager.forceChunk(ticket, chunkXZ);
+        }
+        return true;
+    }
+
+    /**
+     * Switches the forced target chunk on a single reusable ticket: forces {@code (newChunkX, newChunkZ)} first and
+     * then unforces {@code (oldChunkX, oldChunkZ)} without releasing and recreating the ticket.
+     */
+    public static boolean switchChunkLoad(TileEntity owner, int newChunkX, int newChunkZ, int oldChunkX, int oldChunkZ,
+        boolean hasOldChunk, int dimId) {
+        if (owner == null || !GTValues.enableChunkloaders) return false;
+        World world = resolveWorld(dimId);
+        if (world == null) return false;
+
+        ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
+        if (ticket != null && ticket.world != world) {
+            releaseTicket(owner);
+            ticket = null;
+            hasOldChunk = false;
+        }
+        if (ticket != null && hasOldChunk && oldChunkX == newChunkX && oldChunkZ == newChunkZ) {
+            return true;
+        }
+        if (ticket == null) {
+            ticket = createTicket(owner, world, "", dimId);
+            if (ticket == null) return false;
+            instance.registeredTickets.put(owner, ticket);
+            hasOldChunk = false;
+        }
+
+        ChunkCoordIntPair newChunk = new ChunkCoordIntPair(newChunkX, newChunkZ);
+        ForgeChunkManager.forceChunk(ticket, newChunk);
+        if (hasOldChunk && (oldChunkX != newChunkX || oldChunkZ != newChunkZ)) {
+            ForgeChunkManager.unforceChunk(ticket, new ChunkCoordIntPair(oldChunkX, oldChunkZ));
+        }
+        return true;
+    }
+
+    private static World resolveWorld(int dimId) {
+        World world = DimensionManager.getWorld(dimId);
+        if (world == null && DimensionManager.isDimensionRegistered(dimId)) {
+            DimensionManager.initDimension(dimId);
+            world = DimensionManager.getWorld(dimId);
+        }
+        return world;
+    }
+
+    private static ForgeChunkManager.Ticket createTicket(TileEntity owner, World targetWorld, String player,
+        int targetDimId) {
+        ForgeChunkManager.Ticket ticket;
+        if (player == null || player.isEmpty()) {
+            ticket = ForgeChunkManager
+                .requestTicket(EasyTechnology.instance, targetWorld, ForgeChunkManager.Type.NORMAL);
         } else {
-            ForgeChunkManager.Ticket ticket;
-            if (player.isEmpty())
-                ticket = ForgeChunkManager.requestTicket(EasyTechnology.instance, world, ForgeChunkManager.Type.NORMAL);
-            else ticket = ForgeChunkManager
-                .requestPlayerTicket(EasyTechnology.instance, player, world, ForgeChunkManager.Type.NORMAL);
-            if (ticket == null) {
-                if (GTValues.debugChunkloaders)
-                    EasyTechnology.LOG.debug("GTChunkManager: ForgeChunkManager.requestTicket failed");
-                return false;
+            ticket = ForgeChunkManager
+                .requestPlayerTicket(EasyTechnology.instance, player, targetWorld, ForgeChunkManager.Type.NORMAL);
+        }
+        if (ticket == null) {
+            if (GTValues.debugChunkloaders) {
+                EasyTechnology.LOG.debug("GTChunkManager: ForgeChunkManager.requestTicket failed");
             }
-            if (GTValues.debugChunkloaders) EasyTechnology.LOG.debug(
+            return null;
+        }
+        if (GTValues.debugChunkloaders) {
+            EasyTechnology.LOG.debug(
                 "GTChunkManager: ticket issued for machine at: (" + owner.xCoord
                     + ", "
                     + owner.yCoord
                     + ", "
                     + owner.zCoord
                     + ")");
-            NBTTagCompound tag = ticket.getModData();
-            tag.setInteger("OwnerX", owner.xCoord);
-            tag.setInteger("OwnerY", owner.yCoord);
-            tag.setInteger("OwnerZ", owner.zCoord);
-            tag.setInteger("ETHOwnerDim", owner.getWorldObj().provider.dimensionId);
-            tag.setInteger("ETHTargetDim", dimId);
-            tag.setInteger("ETHSchema", 1);
-            tag.setString("ETHTicketType", "working_target");
-            tag.setString(
-                "OwnerType",
-                owner.getClass()
-                    .getSimpleName());
-            ForgeChunkManager.forceChunk(ticket, chunkXZ);
-            instance.registeredTickets.put(owner, ticket);
         }
-        return true;
+        NBTTagCompound tag = ticket.getModData();
+        tag.setInteger("OwnerX", owner.xCoord);
+        tag.setInteger("OwnerY", owner.yCoord);
+        tag.setInteger("OwnerZ", owner.zCoord);
+        if (owner.getWorldObj() != null && owner.getWorldObj().provider != null) {
+            tag.setInteger("ETHOwnerDim", owner.getWorldObj().provider.dimensionId);
+        }
+        tag.setInteger("ETHTargetDim", targetDimId);
+        tag.setInteger("ETHSchema", 1);
+        tag.setString("ETHTicketType", "working_target");
+        tag.setString(
+            "OwnerType",
+            owner.getClass()
+                .getSimpleName());
+        return ticket;
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -189,13 +196,16 @@ public class GTChunkManagerEx
     public static void releaseChunk(TileEntity owner, ChunkCoordIntPair chunkXZ) {
         ForgeChunkManager.Ticket ticket = instance.registeredTickets.get(owner);
         if (ticket != null && chunkXZ != null) {
-            if (GTValues.debugChunkloaders) EasyTechnology.LOG
-                .debug("GTChunkManager: Chunk release: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
+            if (GTValues.debugChunkloaders) {
+                EasyTechnology.LOG
+                    .debug("GTChunkManager: Chunk release: (" + chunkXZ.chunkXPos + ", " + chunkXZ.chunkZPos + ")");
+            }
             ForgeChunkManager.unforceChunk(ticket, chunkXZ);
         }
     }
 
-    public static void releaseTicket(TileEntity owner) {
+    public static boolean releaseTicket(TileEntity owner) {
+        if (owner == null) return false;
         ForgeChunkManager.Ticket ticket = instance.registeredTickets.remove(owner);
         if (ticket != null) {
             if (GTValues.debugChunkloaders) {
@@ -206,11 +216,15 @@ public class GTChunkManagerEx
                         + ", "
                         + owner.zCoord
                         + ")");
-                for (ChunkCoordIntPair chunk : ticket.getChunkList()) EasyTechnology.LOG
-                    .debug("GTChunkManager: Chunk release: (" + chunk.chunkXPos + ", " + chunk.chunkZPos + ")");
+                for (ChunkCoordIntPair chunk : ticket.getChunkList()) {
+                    EasyTechnology.LOG
+                        .debug("GTChunkManager: Chunk release: (" + chunk.chunkXPos + ", " + chunk.chunkZPos + ")");
+                }
             }
             ForgeChunkManager.releaseTicket(ticket);
+            return true;
         }
+        return false;
     }
 
     public static void onServerStopped() {
@@ -227,8 +241,10 @@ public class GTChunkManagerEx
                 .append(", ")
                 .append(machine.zCoord)
                 .append(")");
-            if (ticket.isPlayerTicket()) message.append(" Owner: ")
-                .append(ticket.getPlayerName());
+            if (ticket.isPlayerTicket()) {
+                message.append(" Owner: ")
+                    .append(ticket.getPlayerName());
+            }
             message.append(" :");
             for (ChunkCoordIntPair chunk : ticket.getChunkList()) {
                 message.append('(')
