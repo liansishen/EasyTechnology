@@ -9,7 +9,6 @@ import java.util.Set;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.StatCollector;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -155,7 +154,7 @@ public abstract class OilDrillBaseMixin extends MTEDrillerBase {
 
         GTChunkManagerEx.releaseTicket((TileEntity) base);
         this.mWorkChunkNeedsReload = true;
-        this.setShutdownReason(StatCollector.translateToLocal("GT5U.gui.text.drill_exhausted"));
+        this.setShutdownReason("GT5U.gui.text.drill_exhausted");
         if (yHead < yDrill) {
             this.workState = WorkState.UPWARD;
             cir.setReturnValue(true);
